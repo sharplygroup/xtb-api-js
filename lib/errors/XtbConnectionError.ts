@@ -1,8 +1,8 @@
-import { XtbApiError } from './XtbApiError';
+import { XtbApiError } from "./XtbApiError";
 
 export class XtbConnectionError extends XtbApiError {
-	constructor(message: string) {
-		super(message);
-		this.name = 'XtbConnectionError';
-	}
+  constructor(message: string) {
+    super(message);
+    this.name = "XtbConnectionError";
+  }
 }

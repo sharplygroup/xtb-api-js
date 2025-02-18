@@ -1,7 +1,7 @@
-import { IWebSocketResponse } from '../utils/WebSocketManager';
+import { IWebSocketResponse } from "../utils/WebSocketManager";
 
 export interface IMarginTradeResponse extends IWebSocketResponse {
-	returnData?: {
-		margin: number;
-	};
+  returnData?: {
+    margin: number;
+  };
 }

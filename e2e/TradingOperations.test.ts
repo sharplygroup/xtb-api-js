@@ -1,18 +1,18 @@
-import { TradingOperations } from '../lib/operations/TradingOperations';
-import { WebSocketManager } from '../lib/utils/WebSocketManager';
-import * as dotenv from 'dotenv';
+import { TradingOperations } from "../lib/operations/TradingOperations";
+import { WebSocketManager } from "../lib/utils/WebSocketManager";
+import * as dotenv from "dotenv";
 
-dotenv.config({ path: '.env.e2e' });
+dotenv.config({ path: ".env.e2e" });
 
-describe('TradingOperations E2E Tests', () => {
+describe("TradingOperations E2E Tests", () => {
   let wsManager: WebSocketManager;
   let tradingOperations: TradingOperations;
 
   beforeEach(() => {
     const credentials = {
-      userId: process.env.XTB_USERID || '',
-      password: process.env.XTB_PASSWORD || '',
-      demo: process.env.XTB_DEMO === 'true',
+      userId: process.env.XTB_USERID || "",
+      password: process.env.XTB_PASSWORD || "",
+      demo: process.env.XTB_DEMO === "true",
     };
     wsManager = new WebSocketManager(credentials);
     tradingOperations = new TradingOperations(wsManager);
@@ -22,14 +22,14 @@ describe('TradingOperations E2E Tests', () => {
     await wsManager.disconnect();
   });
 
-  it('should handle trade transaction', async () => {
+  it("should handle trade transaction", async () => {
     await wsManager.connect();
 
     const tradeInfo = {
       cmd: 0,
-      symbol: 'EURUSD',
+      symbol: "EURUSD",
       volume: 0.1,
-      price: 1.1000,
+      price: 1.1,
       type: 0,
     };
 
@@ -40,27 +40,33 @@ describe('TradingOperations E2E Tests', () => {
     await wsManager.disconnect();
   });
 
-  it('should open trade', async () => {
+  it("should open trade", async () => {
     await wsManager.connect();
 
-    const response = await tradingOperations.openTrade('EURUSD', 0, 0.1, 1.1000, {});
+    const response = await tradingOperations.openTrade(
+      "EURUSD",
+      0,
+      0.1,
+      1.1,
+      {},
+    );
     expect(response).toBeDefined();
     expect(response.order).toBeDefined();
 
     await wsManager.disconnect();
   });
 
-  it.skip('should close trade', async () => {
-      await wsManager.connect();
-  
-      const response = await tradingOperations.closeTrade(12345);
-      expect(response).toBeDefined();
-      expect(response.order).toBeDefined();
-  
-      await wsManager.disconnect();
-    });
+  it.skip("should close trade", async () => {
+    await wsManager.connect();
 
-  it('should get trades', async () => {
+    const response = await tradingOperations.closeTrade(12345);
+    expect(response).toBeDefined();
+    expect(response.order).toBeDefined();
+
+    await wsManager.disconnect();
+  });
+
+  it("should get trades", async () => {
     await wsManager.connect();
 
     const response = await tradingOperations.getTrades();

@@ -1,5 +1,5 @@
-import { IWebSocketResponse } from '../utils/WebSocketManager';
+import { IWebSocketResponse } from "../utils/WebSocketManager";
 
 export interface ISymbolsResponse extends IWebSocketResponse {
-	returnData?: [];
+  returnData?: [];
 }

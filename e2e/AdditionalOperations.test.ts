@@ -1,18 +1,18 @@
-import { AdditionalOperations } from '../lib/operations/AdditionalOperations';
-import { WebSocketManager } from '../lib/utils/WebSocketManager';
-import * as dotenv from 'dotenv';
+import { AdditionalOperations } from "../lib/operations/AdditionalOperations";
+import { WebSocketManager } from "../lib/utils/WebSocketManager";
+import * as dotenv from "dotenv";
 
-dotenv.config({ path: '.env.e2e' });
+dotenv.config({ path: ".env.e2e" });
 
-describe('AdditionalOperations E2E Tests', () => {
+describe("AdditionalOperations E2E Tests", () => {
   let wsManager: WebSocketManager;
   let additionalOperations: AdditionalOperations;
 
   beforeEach(() => {
     const credentials = {
-      userId: process.env.XTB_USERID || '',
-      password: process.env.XTB_PASSWORD || '',
-      demo: process.env.XTB_DEMO === 'true',
+      userId: process.env.XTB_USERID || "",
+      password: process.env.XTB_PASSWORD || "",
+      demo: process.env.XTB_DEMO === "true",
     };
     wsManager = new WebSocketManager(credentials);
     additionalOperations = new AdditionalOperations(wsManager);
@@ -22,7 +22,7 @@ describe('AdditionalOperations E2E Tests', () => {
     await wsManager.disconnect();
   });
 
-  it('should get calendar', async () => {
+  it("should get calendar", async () => {
     await wsManager.connect();
     const response = await additionalOperations.getCalendar();
     expect(response).toBeDefined();
@@ -31,7 +31,7 @@ describe('AdditionalOperations E2E Tests', () => {
     await wsManager.disconnect();
   });
 
-  it('should get server time', async () => {
+  it("should get server time", async () => {
     await wsManager.connect();
     const response = await additionalOperations.getServerTime();
     expect(response).toBeDefined();
@@ -40,7 +40,7 @@ describe('AdditionalOperations E2E Tests', () => {
     await wsManager.disconnect();
   });
 
-  it('should get step rules', async () => {
+  it("should get step rules", async () => {
     await wsManager.connect();
     const response = await additionalOperations.getStepRules();
     expect(response).toBeDefined();
@@ -49,7 +49,7 @@ describe('AdditionalOperations E2E Tests', () => {
     await wsManager.disconnect();
   });
 
-  it('should get version', async () => {
+  it("should get version", async () => {
     await wsManager.connect();
     const response = await additionalOperations.getVersion();
     expect(response).toBeDefined();

@@ -1,8 +1,8 @@
-import { IWebSocketResponse } from '../utils/WebSocketManager';
+import { IWebSocketResponse } from "../utils/WebSocketManager";
 
 export interface ICommissionResponse extends IWebSocketResponse {
-	returnData?: {
-		commission: number;
-		rateOfExchange: number;
-	};
+  returnData?: {
+    commission: number;
+    rateOfExchange: number;
+  };
 }

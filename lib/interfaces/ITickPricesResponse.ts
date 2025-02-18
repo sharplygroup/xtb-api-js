@@ -1,7 +1,7 @@
-import { IWebSocketResponse } from '../utils/WebSocketManager';
+import { IWebSocketResponse } from "../utils/WebSocketManager";
 
 export interface ITickPricesResponse extends IWebSocketResponse {
-	returnData?: {
-		quotations: number[];
-	};
+  returnData?: {
+    quotations: number[];
+  };
 }

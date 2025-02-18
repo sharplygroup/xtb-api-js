@@ -1,4 +1,4 @@
-import { IWebSocketResponse } from '../utils/WebSocketManager';
+import { IWebSocketResponse } from "../utils/WebSocketManager";
 
 export interface ITradeTransactionData {
   order: number;
@@ -6,5 +6,5 @@ export interface ITradeTransactionData {
 }
 
 export interface ITradeTransactionResponse extends IWebSocketResponse {
-	returnData?: ITradeTransactionData;
+  returnData?: ITradeTransactionData;
 }

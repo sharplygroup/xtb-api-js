@@ -1,4 +1,4 @@
-import { IWebSocketResponse } from '../utils/WebSocketManager';
+import { IWebSocketResponse } from "../utils/WebSocketManager";
 
 export interface ISymbolData {
   symbol: string;
@@ -7,5 +7,5 @@ export interface ISymbolData {
 }
 
 export interface ISymbolResponse extends IWebSocketResponse {
-	returnData?: ISymbolData;
+  returnData?: ISymbolData;
 }
