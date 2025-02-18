@@ -1,17 +1,41 @@
 {
   "name": "xtb-api-module",
   "version": "0.1.0",
-  "description": "XTB API module",
+  "description": "A module for interacting with the XTB API",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-username/xtb-api-module.git"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "prepare": "npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --write ."
   },
   "keywords": [
     "xtb",
-    "api"
+    "api",
+    "trading"
   ],
   "author": "Adrian Budzyński",
   "license": "MIT",
+  "devDependencies": {
+    "@types/ws": "^8.5.14",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.4",
+    "typescript": "^5.3.3"
+  },
   "dependencies": {
     "ws": "^8.16.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
   }
 }

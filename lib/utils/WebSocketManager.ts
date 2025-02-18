@@ -1,5 +1,4 @@
 import WebSocket from 'ws';
-import { IDataObject } from 'n8n-workflow';
 import { XtbLoginError } from '../errors/XtbLoginError';
 import { XtbConnectionError } from '../errors/XtbConnectionError';
 
@@ -11,7 +10,7 @@ export interface IXtbCredentials {
 
 export interface IWebSocketResponse {
 	status: boolean;
-	returnData?: IDataObject | IDataObject[];
+	returnData?: any;
 	errorCode?: string;
 	errorDescr?: string;
 	streamSessionId?: string;
@@ -123,11 +122,11 @@ export class WebSocketManager {
 		); // 10 minutes
 	}
 
-	public async sendCommand(command: IDataObject): Promise<IWebSocketResponse> {
-		if (!this.mainSocket || this.mainSocket.readyState !== 1) {
-			// 1 = OPEN
-			throw new Error('Main socket not connected');
-		}
+	public async sendCommand(command: any): Promise<IWebSocketResponse> {
+			if (!this.mainSocket || this.mainSocket.readyState !== 1) {
+				// 1 = OPEN
+				throw new Error('Main socket not connected');
+			}
 
 		return new Promise((resolve, reject) => {
 			const timeout = setTimeout(() => {
@@ -156,11 +155,11 @@ export class WebSocketManager {
 		});
 	}
 
-	public async sendStreamCommand(command: IDataObject): Promise<void> {
-		if (!this.streamSocket || this.streamSocket.readyState !== 1) {
-			// 1 = OPEN
-			throw new Error('Stream socket not connected');
-		}
+	public async sendStreamCommand(command: any): Promise<void> {
+			if (!this.streamSocket || this.streamSocket.readyState !== 1) {
+				// 1 = OPEN
+				throw new Error('Stream socket not connected');
+			}
 
 		if (!this.streamSessionId) {
 			throw new Error('No stream session ID available');
@@ -174,10 +173,10 @@ export class WebSocketManager {
 		this.streamSocket.send(JSON.stringify(streamCommand));
 	}
 
-	public onStreamMessage(callback: (data: IDataObject) => void): void {
-		if (!this.streamSocket) {
-			throw new Error('Stream socket not connected');
-		}
+	public onStreamMessage(callback: (data: any) => void): void {
+			if (!this.streamSocket) {
+				throw new Error('Stream socket not connected');
+			}
 
 		this.streamSocket.on('message', (data: WebSocket.Data) => {
 			try {
