@@ -1,0 +1,17 @@
+{
+  "name": "xtb-api-module",
+  "version": "0.1.0",
+  "description": "XTB API module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "xtb",
+    "api"
+  ],
+  "author": "Adrian Budzyński",
+  "license": "MIT",
+  "dependencies": {
+    "ws": "^8.16.0"
+  }
+}
