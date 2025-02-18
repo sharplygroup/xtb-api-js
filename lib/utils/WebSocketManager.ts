@@ -101,7 +101,7 @@ export class WebSocketManager {
 		});
 	}
 
-	private async login(): Promise<IWebSocketResponse> {
+	public async login(): Promise<IWebSocketResponse> {
 		const command: ICommand = {
 			command: 'login',
 			arguments: {

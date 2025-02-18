@@ -4,3 +4,4 @@ src
 *.ts
 *.map
 .DS_Store
+.env.e2e
