@@ -6,144 +6,86 @@ export class AdditionalOperations {
 	async getCalendar(): Promise<any> {
 		const response = await this.wsManager.sendCommand({
 			command: 'getCalendar',
+			arguments: {}
 		});
-		if (Array.isArray(response.returnData)) {
-			return response.returnData[0] || {};
-		}
-		return response.returnData || {};
-	}
 
-	async getIbsHistory(start: number, end: number): Promise<any> {
-		const response = await this.wsManager.sendCommand({
-			command: 'getIbsHistory',
-			arguments: {
-				start,
-				end,
-			},
-		});
-		if (Array.isArray(response.returnData)) {
-			return response.returnData[0] || {};
-		}
-		return response.returnData || {};
+		return response;
 	}
 
 	async getServerTime(): Promise<any> {
 		const response = await this.wsManager.sendCommand({
 			command: 'getServerTime',
+			arguments: {}
 		});
-		if (Array.isArray(response.returnData)) {
-			return response.returnData[0] || {};
-		}
-		return response.returnData || {};
+
+		return response;
 	}
 
 	async getStepRules(): Promise<any> {
 		const response = await this.wsManager.sendCommand({
 			command: 'getStepRules',
+			arguments: {}
 		});
-		if (Array.isArray(response.returnData)) {
-			return response.returnData[0] || {};
-		}
-		return response.returnData || {};
-	}
 
-	async getTradeRecords(orders: number[]): Promise<any> {
-		const response = await this.wsManager.sendCommand({
-			command: 'getTradeRecords',
-			arguments: {
-				orders,
-			},
-		});
-		if (Array.isArray(response.returnData)) {
-			return response.returnData[0] || {};
-		}
-		return response.returnData || {};
-	}
-
-	async getTradesHistory(start: number, end: number): Promise<any> {
-		const response = await this.wsManager.sendCommand({
-			command: 'getTradesHistory',
-			arguments: {
-				start,
-				end,
-			},
-		});
-		if (Array.isArray(response.returnData)) {
-			return response.returnData[0] || {};
-		}
-		return response.returnData || {};
+		return response;
 	}
 
 	async getVersion(): Promise<any> {
 		const response = await this.wsManager.sendCommand({
 			command: 'getVersion',
+			arguments: {}
 		});
-		if (Array.isArray(response.returnData)) {
-			return response.returnData[0] || {};
-		}
-		return response.returnData || {};
+
+		return response;
 	}
 
-	async tradeTransactionStatus(order: number): Promise<any> {
-		const response = await this.wsManager.sendCommand({
-			command: 'tradeTransactionStatus',
-			arguments: {
-				order,
-			},
-		});
-		if (Array.isArray(response.returnData)) {
-			return response.returnData[0] || {};
-		}
-		return response.returnData || {};
-	}
-
-	async getBalance(): Promise<any> {
+	async getBalance(): Promise<void> {
 		await this.wsManager.sendStreamCommand({
 			command: 'getBalance',
+			arguments: {}
 		});
-		return {};
 	}
 
-	async getCandles(symbol: string): Promise<any> {
+	async getCandles(symbol: string): Promise<void> {
 		await this.wsManager.sendStreamCommand({
 			command: 'getCandles',
 			symbol,
+			arguments: {}
 		});
-		return {};
 	}
 
-	async getKeepAlive(): Promise<any> {
+	async getKeepAlive(): Promise<void> {
 		await this.wsManager.sendStreamCommand({
 			command: 'getKeepAlive',
+			arguments: {}
 		});
-		return {};
 	}
 
-	async getNews(): Promise<any> {
+	async getNews(): Promise<void> {
 		await this.wsManager.sendStreamCommand({
 			command: 'getNews',
+			arguments: {}
 		});
-		return {};
 	}
 
-	async getProfits(): Promise<any> {
+	async getProfits(): Promise<void> {
 		await this.wsManager.sendStreamCommand({
 			command: 'getProfits',
+			arguments: {}
 		});
-		return {};
 	}
 
-	async getTradeStatus(): Promise<any> {
+	async getTradeStatus(): Promise<void> {
 		await this.wsManager.sendStreamCommand({
 			command: 'getTradeStatus',
+			arguments: {}
 		});
-		return {};
 	}
 
-	async ping(): Promise<any> {
+	async ping(): Promise<void> {
 		await this.wsManager.sendStreamCommand({
 			command: 'ping',
+			arguments: {}
 		});
-		return {};
 	}
 }

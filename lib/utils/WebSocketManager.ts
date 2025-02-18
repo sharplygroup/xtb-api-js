@@ -16,6 +16,12 @@ export interface IWebSocketResponse {
 	streamSessionId?: string;
 }
 
+export interface ICommand {
+  command: string;
+  arguments: any;
+  [key: string]: any; // Allow additional properties
+}
+
 export class WebSocketManager {
 	private mainSocket: WebSocket | null = null;
 	private streamSocket: WebSocket | null = null;
@@ -96,7 +102,7 @@ export class WebSocketManager {
 	}
 
 	private async login(): Promise<IWebSocketResponse> {
-		const command = {
+		const command: ICommand = {
 			command: 'login',
 			arguments: {
 				userId: this.credentials.userId,
@@ -112,7 +118,7 @@ export class WebSocketManager {
 		this.pingInterval = setInterval(
 			async () => {
 				try {
-					await this.sendCommand({ command: 'ping' });
+					await this.sendCommand({ command: 'ping', arguments: {} });
 				} catch (error) {
 					// Handle ping error - maybe reconnect
 					console.error('Ping failed:', error);
@@ -122,7 +128,7 @@ export class WebSocketManager {
 		); // 10 minutes
 	}
 
-	public async sendCommand(command: any): Promise<IWebSocketResponse> {
+	public async sendCommand(command: ICommand): Promise<IWebSocketResponse> {
 			if (!this.mainSocket || this.mainSocket.readyState !== 1) {
 				// 1 = OPEN
 				throw new Error('Main socket not connected');
@@ -155,7 +161,7 @@ export class WebSocketManager {
 		});
 	}
 
-	public async sendStreamCommand(command: any): Promise<void> {
+	public async sendStreamCommand(command: ICommand): Promise<void> {
 			if (!this.streamSocket || this.streamSocket.readyState !== 1) {
 				// 1 = OPEN
 				throw new Error('Stream socket not connected');
@@ -196,8 +202,8 @@ export class WebSocketManager {
 
 		if (this.mainSocket) {
 			try {
-				await this.sendCommand({ command: 'logout' });
-			} catch (error) {
+				await this.sendCommand({ command: 'logout', arguments: {} });
+			} catch {
 				// Ignore logout errors
 			}
 			this.mainSocket.close();

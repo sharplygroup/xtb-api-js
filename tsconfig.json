@@ -1,13 +1,13 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "CommonJS",
+    "module": "Node16",
     "declaration": true,
     "sourceMap": true,
     "outDir": "./dist",
     "strict": true,
     "esModuleInterop": true,
-    "moduleResolution": "node",
+    "moduleResolution": "node16",
     "baseUrl": ".",
     "paths": {
       "*": ["lib/*"]

@@ -1,12 +1,21 @@
 import { WebSocketManager } from '../utils/WebSocketManager';
 import { ITradeTransactionResponse } from '../interfaces/ITradeTransactionResponse';
-import { ITradeStatusResponse } from '../interfaces/ITradeStatusResponse';
+import { ITradeStatusResponse, ITradeStatusData } from '../interfaces/ITradeStatusResponse';
 import { ITradesResponse } from '../interfaces/ITradesResponse';
+
+export interface ITradeInfo {
+  cmd: number;
+  symbol: string;
+  volume: number;
+  price: number;
+  type: number;
+  [key: string]: any; // Allow additional properties
+}
 
 export class TradingOperations {
 	constructor(private readonly wsManager: WebSocketManager) {}
 
-	async handleTradeTransaction(tradeInfo: any): Promise<any> {
+	async handleTradeTransaction(tradeInfo: ITradeInfo): Promise<ITradeStatusData> {
 		const tradeResponse = (await this.wsManager.sendCommand({
 			command: 'tradeTransaction',
 			arguments: {
@@ -39,8 +48,8 @@ export class TradingOperations {
 		volume: number,
 		price: number,
 		additionalFields: any,
-	): Promise<any> {
-		const tradeInfo = {
+	): Promise<ITradeStatusData> {
+		const tradeInfo: ITradeInfo = {
 			cmd,
 			symbol,
 			volume,
@@ -52,17 +61,20 @@ export class TradingOperations {
 		return this.handleTradeTransaction(tradeInfo);
 	}
 
-	async closeTrade(order: number): Promise<any> {
-		const tradeInfo = {
+	async closeTrade(order: number): Promise<ITradeStatusData> {
+		const tradeInfo: ITradeInfo = {
 			cmd: 0, // The original command will be determined by the server
 			order,
 			type: 2, // Close
+      symbol: "",
+      volume: 0,
+      price: 0,
 		};
 
 		return this.handleTradeTransaction(tradeInfo);
 	}
 
-	async getTrades(): Promise<any> {
+	async getTrades(): Promise<{ trades: any }> {
 		const tradesResponse = (await this.wsManager.sendCommand({
 			command: 'getTrades',
 			arguments: {
