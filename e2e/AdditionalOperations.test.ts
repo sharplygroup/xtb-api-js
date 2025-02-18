@@ -1,5 +1,5 @@
-import { AdditionalOperations } from "../lib/operations/AdditionalOperations";
-import { WebSocketManager } from "../lib/utils/WebSocketManager";
+import { AdditionalOperations } from "../src/operations/AdditionalOperations";
+import { WebSocketManager } from "../src/utils/WebSocketManager";
 import * as dotenv from "dotenv";
 
 dotenv.config({ path: ".env.e2e" });

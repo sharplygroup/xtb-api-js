@@ -1,5 +1,5 @@
-import { MarketDataOperations } from "../lib/operations/MarketDataOperations";
-import { WebSocketManager } from "../lib/utils/WebSocketManager";
+import { MarketDataOperations } from "../src/operations/MarketDataOperations";
+import { WebSocketManager } from "../src/utils/WebSocketManager";
 import * as dotenv from "dotenv";
 
 dotenv.config({ path: ".env.e2e" });

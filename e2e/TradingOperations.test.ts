@@ -1,5 +1,5 @@
-import { TradingOperations } from "../lib/operations/TradingOperations";
-import { WebSocketManager } from "../lib/utils/WebSocketManager";
+import { TradingOperations } from "../src/operations/TradingOperations";
+import { WebSocketManager } from "../src/utils/WebSocketManager";
 import * as dotenv from "dotenv";
 
 dotenv.config({ path: ".env.e2e" });

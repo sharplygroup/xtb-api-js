@@ -1,7 +1,7 @@
-import { WebSocketManager } from "../lib/utils/WebSocketManager";
+import { WebSocketManager } from "../src/utils/WebSocketManager";
 import WebSocket from "ws";
 import * as dotenv from "dotenv";
-import { XtbLoginError } from "../lib/errors/XtbLoginError";
+import { XtbLoginError } from "../src/errors/XtbLoginError";
 
 dotenv.config({ path: ".env.e2e" });
 
