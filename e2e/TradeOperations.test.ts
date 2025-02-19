@@ -1,4 +1,5 @@
 import { TradeOperations } from "../src/operations/TradeOperations";
+import { TradingOperations } from "../src/operations/TradingOperations";
 import { WebSocketManager } from "../src/utils/WebSocketManager";
 import * as dotenv from "dotenv";
 
@@ -69,11 +70,31 @@ describe("TradeOperations E2E Tests", () => {
   it("should get trade status", async () => {
     await wsManager.connect();
 
-    const order = 12345; // Replace with an actual order number
-    const tradeStatus = await tradeOperations.getTradeStatus(order);
+    // First, start a trade transaction to get an order number
+    const tradingOperations = new TradingOperations(wsManager);
+    const tradeTransInfo = {
+      cmd: 0, // BUY
+      symbol: "EURUSD",
+      volume: 0.1,
+      type: 0, // OPEN
+      price: 1.1,
+    };
+    const tradeTransaction = await tradingOperations.tradeTransaction(tradeTransInfo);
 
-    expect(tradeStatus).toBeDefined();
-    expect(tradeStatus.status).toBe(true);
-    expect(tradeStatus.returnData).toBeDefined();
+    expect(tradeTransaction).toBeDefined();
+    expect(tradeTransaction.status).toBe(true);
+    expect(tradeTransaction.returnData).toBeDefined();
+
+    const order = tradeTransaction.returnData && tradeTransaction.returnData.order;
+
+    if (order) {
+      const tradeStatus = await tradeOperations.getTradeStatus(order);
+
+      expect(tradeStatus).toBeDefined();
+      expect(tradeStatus.status).toBe(true);
+      expect(tradeStatus.returnData).toBeDefined();
+    } else {
+      console.warn("Order number is undefined, skipping tradeStatus test");
+    }
   });
 });

@@ -40,6 +40,7 @@ describe("TradingOperations E2E Tests", () => {
       symbol: "EURUSD",
       volume: 0.1,
       type: 0, // OPEN
+      price: 1.1,
     };
     const tradeTransaction =
       await tradingOperations.tradeTransaction(tradeTransInfo);
@@ -58,6 +59,7 @@ describe("TradingOperations E2E Tests", () => {
       symbol: "EURUSD",
       volume: 0.1,
       type: 0, // OPEN
+      price: 1.1,
     };
     const tradeTransaction =
       await tradingOperations.tradeTransaction(tradeTransInfo);
