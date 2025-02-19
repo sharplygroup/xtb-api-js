@@ -1,10 +1,13 @@
 import { WebSocketManager } from "../utils/WebSocketManager";
-import { IAccountDataResponse } from "../interfaces/IAccountDataResponse";
-import { IMarginLevelResponse } from "../interfaces/IMarginLevelResponse";
+import { IAccountDataResponse, IMarginLevelResponse } from "../interfaces";
 
 export class AccountOperations {
   constructor(private readonly wsManager: WebSocketManager) {}
 
+  /**
+   * Returns information about account currency, and account leverage.
+   * @returns {Promise<IAccountDataResponse>}
+   */
   async getCurrentUserData(): Promise<IAccountDataResponse> {
     const response = (await this.wsManager.sendCommand({
       command: "getCurrentUserData",
@@ -21,6 +24,10 @@ export class AccountOperations {
     };
   }
 
+  /**
+   * Returns various account indicators.
+   * @returns {Promise<IMarginLevelResponse>}
+   */
   async getMarginLevel(): Promise<IMarginLevelResponse> {
     const response = (await this.wsManager.sendCommand({
       command: "getMarginLevel",

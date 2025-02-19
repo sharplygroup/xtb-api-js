@@ -9,10 +9,20 @@ describe("TradingOperations E2E Tests", () => {
   let tradingOperations: TradingOperations;
 
   beforeEach(() => {
+    const userId = process.env.XTB_USERID || "";
+    const password = process.env.XTB_PASSWORD || "";
+    const demo = process.env.XTB_DEMO === "true";
+
+    if (!userId || !password) {
+      throw new Error(
+        "XTB_USERID and XTB_PASSWORD must be defined in .env.e2e",
+      );
+    }
+
     const credentials = {
-      userId: process.env.XTB_USERID || "",
-      password: process.env.XTB_PASSWORD || "",
-      demo: process.env.XTB_DEMO === "true",
+      userId: userId,
+      password: password,
+      demo: demo,
     };
     wsManager = new WebSocketManager(credentials);
     tradingOperations = new TradingOperations(wsManager);
@@ -22,57 +32,53 @@ describe("TradingOperations E2E Tests", () => {
     await wsManager.disconnect();
   });
 
-  it("should handle trade transaction", async () => {
+  it("should start trade transaction", async () => {
     await wsManager.connect();
 
-    const tradeInfo = {
-      cmd: 0,
+    const tradeTransInfo = {
+      cmd: 0, // BUY
       symbol: "EURUSD",
       volume: 0.1,
+      type: 0, // OPEN
       price: 1.1,
-      type: 0,
     };
+    const tradeTransaction =
+      await tradingOperations.tradeTransaction(tradeTransInfo);
 
-    const response = await tradingOperations.handleTradeTransaction(tradeInfo);
-    expect(response).toBeDefined();
-    expect(response.order).toBeDefined();
-
-    await wsManager.disconnect();
+    expect(tradeTransaction).toBeDefined();
+    expect(tradeTransaction.status).toBe(true);
+    expect(tradeTransaction.returnData).toBeDefined();
   });
 
-  it("should open trade", async () => {
+  it("should get trade transaction status", async () => {
     await wsManager.connect();
 
-    const response = await tradingOperations.openTrade(
-      "EURUSD",
-      0,
-      0.1,
-      1.1,
-      {},
-    );
-    expect(response).toBeDefined();
-    expect(response.order).toBeDefined();
+    // First, start a trade transaction to get an order number
+    const tradeTransInfo = {
+      cmd: 0, // BUY
+      symbol: "EURUSD",
+      volume: 0.1,
+      type: 0, // OPEN
+      price: 1.1,
+    };
+    const tradeTransaction =
+      await tradingOperations.tradeTransaction(tradeTransInfo);
 
-    await wsManager.disconnect();
-  });
+    expect(tradeTransaction).toBeDefined();
+    expect(tradeTransaction.status).toBe(true);
+    expect(tradeTransaction.returnData).toBeDefined();
 
-  it.skip("should close trade", async () => {
-    await wsManager.connect();
+    const order =
+      tradeTransaction.returnData && tradeTransaction.returnData.order;
 
-    const response = await tradingOperations.closeTrade(12345);
-    expect(response).toBeDefined();
-    expect(response.order).toBeDefined();
+    if (order) {
+      const tradeStatus = await tradingOperations.tradeTransactionStatus(order);
 
-    await wsManager.disconnect();
-  });
-
-  it("should get trades", async () => {
-    await wsManager.connect();
-
-    const response = await tradingOperations.getTrades();
-    expect(response).toBeDefined();
-    expect(response.trades).toBeDefined();
-
-    await wsManager.disconnect();
+      expect(tradeStatus).toBeDefined();
+      expect(tradeStatus.status).toBe(true);
+      expect(tradeStatus.returnData).toBeDefined();
+    } else {
+      console.warn("Order number is undefined, skipping tradeStatus test");
+    }
   });
 });

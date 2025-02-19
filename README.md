@@ -6,12 +6,12 @@ A NodeJS library for interacting with the XTB API. It provides functionalities f
 
 ## Table of Contents
 
-*   [Installation](#installation)
-*   [Usage](#usage)
-*   [Contributing](#contributing)
-*   [License](#license)
-*   [Support](#support)
-*   [Credits](#credits)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Contributing](#contributing)
+- [License](#license)
+- [Support](#support)
+- [Credits](#credits)
 
 ## Installation
 
@@ -28,11 +28,14 @@ yarn add @sharplygroup/xtb-api-js
 ## Example usage
 
 ```javascript
-const { WebSocketManager, AccountOperations } = require('xtb-api-js');
+const {
+  WebSocketManager,
+  AccountOperations,
+} = require("@sharplygroup/xtb-api-js");
 
 const wsManager = new WebSocketManager({
-  userId: 'your_user_id', // Replace with your user ID
-  password: 'your_password', // Replace with your password
+  userId: "your_user_id", // Replace with your user ID
+  password: "your_password", // Replace with your password
   demo: true, // Set to false for live account
 });
 
