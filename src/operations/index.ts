@@ -6,5 +6,4 @@ export * from "./TradingOperations";
 export * from "./CalculationOperations";
 export * from "./ServerOperations";
 export * from "./DmaOperations";
-export * from "./IbsOperations";
 export * from "./NewsOperations";
