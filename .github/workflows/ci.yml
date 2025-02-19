@@ -1,27 +1,22 @@
-name: CI
+name: Integration build
 
 on:
-  push:
-    branches: [ '*' ]
   pull_request:
-    branches: [ main ]
+    branches: [ '*' ]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     env:
       XTB_USERID: ${{ secrets.XTB_USERID }}
       XTB_PASSWORD: ${{ secrets.XTB_PASSWORD }}
       XTB_DEMO: ${{ vars.XTB_DEMO }}
-
     steps:
-      - uses: actions/checkout@v3
-      - name: Use Node.js
-        uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: 20
+          registry-url: https://registry.npmjs.org/
       - run: npm install
       - run: npm run lint
       - run: npm run test

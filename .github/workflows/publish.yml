@@ -8,14 +8,18 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    env:
+      XTB_USERID: ${{ secrets.XTB_USERID }}
+      XTB_PASSWORD: ${{ secrets.XTB_PASSWORD }}
+      XTB_DEMO: ${{ vars.XTB_DEMO }}
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           registry-url: https://registry.npmjs.org/
-      - run: npm install
-      - run: npm run verify
+      - run: npm run lint
+      - run: npm run test
       - run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          
