@@ -11,6 +11,11 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    env:
+      XTB_USERID: ${{ secrets.XTB_USERID }}
+      XTB_PASSWORD: ${{ secrets.XTB_PASSWORD }}
+      XTB_DEMO: ${{ vars.XTB_DEMO }}
+
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js
