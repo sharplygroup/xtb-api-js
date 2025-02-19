@@ -16,13 +16,13 @@ A NodeJS library for interacting with the XTB API. It provides functionalities f
 ## Installation
 
 ```bash
-npm install xtb-api-js
+npm install @sharplygroup/xtb-api-js
 ```
 
 or
 
 ```bash
-yarn add xtb-api-js
+yarn add @sharplygroup/xtb-api-js
 ```
 
 ## Example usage
