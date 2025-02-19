@@ -1,12 +1,12 @@
-import { AccountOperations } from "../src/operations/AccountOperations";
+import { SymbolOperations } from "../src/operations/SymbolOperations";
 import { WebSocketManager } from "../src/utils/WebSocketManager";
 import * as dotenv from "dotenv";
 
 dotenv.config({ path: ".env.e2e" });
 
-describe("AccountOperations E2E Tests", () => {
+describe("SymbolOperations E2E Tests", () => {
   let wsManager: WebSocketManager;
-  let accountOperations: AccountOperations;
+  let symbolOperations: SymbolOperations;
 
   beforeEach(() => {
     const userId = process.env.XTB_USERID || "";
@@ -25,30 +25,31 @@ describe("AccountOperations E2E Tests", () => {
       demo: demo,
     };
     wsManager = new WebSocketManager(credentials);
-    accountOperations = new AccountOperations(wsManager);
+    symbolOperations = new SymbolOperations(wsManager);
   });
 
   afterEach(async () => {
     await wsManager.disconnect();
   });
 
-  it("should get current user data", async () => {
+  it("should get all symbols", async () => {
     await wsManager.connect();
 
-    const userData = await accountOperations.getCurrentUserData();
+    const symbols = await symbolOperations.getAllSymbols();
 
-    expect(userData).toBeDefined();
-    expect(userData.status).toBe(true);
-    expect(userData.returnData).toBeDefined();
+    expect(symbols).toBeDefined();
+    expect(symbols.status).toBe(true);
+    expect(symbols.returnData).toBeDefined();
   });
 
-  it("should get margin level", async () => {
+  it("should get a symbol", async () => {
     await wsManager.connect();
 
-    const marginLevel = await accountOperations.getMarginLevel();
+    const symbol = "EURUSD";
+    const symbolData = await symbolOperations.getSymbol(symbol);
 
-    expect(marginLevel).toBeDefined();
-    expect(marginLevel.status).toBe(true);
-    expect(marginLevel.returnData).toBeDefined();
+    expect(symbolData).toBeDefined();
+    expect(symbolData.status).toBe(true);
+    expect(symbolData.returnData).toBeDefined();
   });
 });

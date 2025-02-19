@@ -1,12 +1,12 @@
-import { AccountOperations } from "../src/operations/AccountOperations";
+import { NewsOperations } from "../src/operations/NewsOperations";
 import { WebSocketManager } from "../src/utils/WebSocketManager";
 import * as dotenv from "dotenv";
 
 dotenv.config({ path: ".env.e2e" });
 
-describe("AccountOperations E2E Tests", () => {
+describe("NewsOperations E2E Tests", () => {
   let wsManager: WebSocketManager;
-  let accountOperations: AccountOperations;
+  let newsOperations: NewsOperations;
 
   beforeEach(() => {
     const userId = process.env.XTB_USERID || "";
@@ -25,30 +25,22 @@ describe("AccountOperations E2E Tests", () => {
       demo: demo,
     };
     wsManager = new WebSocketManager(credentials);
-    accountOperations = new AccountOperations(wsManager);
+    newsOperations = new NewsOperations(wsManager);
   });
 
   afterEach(async () => {
     await wsManager.disconnect();
   });
 
-  it("should get current user data", async () => {
+  it("should get news", async () => {
     await wsManager.connect();
 
-    const userData = await accountOperations.getCurrentUserData();
+    const end = Date.now();
+    const start = Date.now() - 24 * 60 * 60 * 1000; // Last day
+    const news = await newsOperations.getNews(end, start);
 
-    expect(userData).toBeDefined();
-    expect(userData.status).toBe(true);
-    expect(userData.returnData).toBeDefined();
-  });
-
-  it("should get margin level", async () => {
-    await wsManager.connect();
-
-    const marginLevel = await accountOperations.getMarginLevel();
-
-    expect(marginLevel).toBeDefined();
-    expect(marginLevel.status).toBe(true);
-    expect(marginLevel.returnData).toBeDefined();
+    expect(news).toBeDefined();
+    expect(news.status).toBe(true);
+    expect(news.returnData).toBeDefined();
   });
 });

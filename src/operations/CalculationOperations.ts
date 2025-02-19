@@ -1,5 +1,9 @@
 import { WebSocketManager } from "../utils/WebSocketManager";
-import { ICommissionResponse, IMarginTradeResponse, IProfitCalculationResponse } from "../interfaces";
+import {
+  ICommissionResponse,
+  IMarginTradeResponse,
+  IProfitCalculationResponse,
+} from "../interfaces";
 
 export class CalculationOperations {
   constructor(private readonly wsManager: WebSocketManager) {}
@@ -10,7 +14,10 @@ export class CalculationOperations {
    * @param {number} volume - volume
    * @returns {Promise<ICommissionResponse>}
    */
-  async getCommissionDef(symbol: string, volume: number): Promise<ICommissionResponse> {
+  async getCommissionDef(
+    symbol: string,
+    volume: number,
+  ): Promise<ICommissionResponse> {
     const response = (await this.wsManager.sendCommand({
       command: "getCommissionDef",
       arguments: {
@@ -20,7 +27,9 @@ export class CalculationOperations {
     })) as ICommissionResponse;
 
     if (!response.status || !response.returnData) {
-      throw new Error(response.errorDescr || "Failed to get commission definition");
+      throw new Error(
+        response.errorDescr || "Failed to get commission definition",
+      );
     }
 
     return {
@@ -35,7 +44,10 @@ export class CalculationOperations {
    * @param {number} volume - volume
    * @returns {Promise<IMarginTradeResponse>}
    */
-  async getMarginTrade(symbol: string, volume: number): Promise<IMarginTradeResponse> {
+  async getMarginTrade(
+    symbol: string,
+    volume: number,
+  ): Promise<IMarginTradeResponse> {
     const response = (await this.wsManager.sendCommand({
       command: "getMarginTrade",
       arguments: {
@@ -82,7 +94,9 @@ export class CalculationOperations {
     })) as IProfitCalculationResponse;
 
     if (!response.status || !response.returnData) {
-      throw new Error(response.errorDescr || "Failed to get profit calculation");
+      throw new Error(
+        response.errorDescr || "Failed to get profit calculation",
+      );
     }
 
     return {

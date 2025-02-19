@@ -42,7 +42,9 @@ export class MarketDataOperations {
     })) as IChartResponse;
 
     if (!response.status || !response.returnData) {
-      throw new Error(response.errorDescr || "Failed to get chart last request");
+      throw new Error(
+        response.errorDescr || "Failed to get chart last request",
+      );
     }
 
     return {
@@ -65,7 +67,9 @@ export class MarketDataOperations {
     })) as IChartResponse;
 
     if (!response.status || !response.returnData) {
-      throw new Error(response.errorDescr || "Failed to get chart range request");
+      throw new Error(
+        response.errorDescr || "Failed to get chart range request",
+      );
     }
 
     return {

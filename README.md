@@ -28,7 +28,10 @@ yarn add @sharplygroup/xtb-api-js
 ## Example usage
 
 ```javascript
-const { WebSocketManager, AccountOperations } = require("@sharplygroup/xtb-api-js");
+const {
+  WebSocketManager,
+  AccountOperations,
+} = require("@sharplygroup/xtb-api-js");
 
 const wsManager = new WebSocketManager({
   userId: "your_user_id", // Replace with your user ID

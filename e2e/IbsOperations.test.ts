@@ -1,12 +1,12 @@
-import { AccountOperations } from "../src/operations/AccountOperations";
+import { IbsOperations } from "../src/operations/IbsOperations";
 import { WebSocketManager } from "../src/utils/WebSocketManager";
 import * as dotenv from "dotenv";
 
 dotenv.config({ path: ".env.e2e" });
 
-describe("AccountOperations E2E Tests", () => {
+describe("IbsOperations E2E Tests", () => {
   let wsManager: WebSocketManager;
-  let accountOperations: AccountOperations;
+  let ibsOperations: IbsOperations;
 
   beforeEach(() => {
     const userId = process.env.XTB_USERID || "";
@@ -25,30 +25,22 @@ describe("AccountOperations E2E Tests", () => {
       demo: demo,
     };
     wsManager = new WebSocketManager(credentials);
-    accountOperations = new AccountOperations(wsManager);
+    ibsOperations = new IbsOperations(wsManager);
   });
 
   afterEach(async () => {
     await wsManager.disconnect();
   });
 
-  it("should get current user data", async () => {
+  it("should get IBs history", async () => {
     await wsManager.connect();
 
-    const userData = await accountOperations.getCurrentUserData();
+    const end = Date.now();
+    const start = Date.now() - 30 * 24 * 60 * 60 * 1000; // Last month
+    const ibsHistory = await ibsOperations.getIbsHistory(end, start);
 
-    expect(userData).toBeDefined();
-    expect(userData.status).toBe(true);
-    expect(userData.returnData).toBeDefined();
-  });
-
-  it("should get margin level", async () => {
-    await wsManager.connect();
-
-    const marginLevel = await accountOperations.getMarginLevel();
-
-    expect(marginLevel).toBeDefined();
-    expect(marginLevel.status).toBe(true);
-    expect(marginLevel.returnData).toBeDefined();
+    expect(ibsHistory).toBeDefined();
+    expect(ibsHistory.status).toBe(true);
+    expect(ibsHistory.returnData).toBeDefined();
   });
 });

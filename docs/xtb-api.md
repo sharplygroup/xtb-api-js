@@ -189,7 +189,6 @@ For convenience server guarantees that every separate reply to client command re
 
 4. ### Output data format
 
-
    ```
    {
    	"status": true,
@@ -219,2382 +218,2000 @@ For convenience server guarantees that every separate reply to client command re
 
 Request-Reply commands are performed on main connection socket. The reply is sent by main connection socket.
 
-1. ### Login
+1.  ### Login
 
-   In order to perform any action client application have to perform login process. No functionality is available before proper login process.
+    In order to perform any action client application have to perform login process. No functionality is available before proper login process.
 
-   After initial login, a new session is created and all commands are executed for a logged user until he/she logs out or drops the connection.
+    After initial login, a new session is created and all commands are executed for a logged user until he/she logs out or drops the connection.
 
-   ##### Request:
+    ##### Request:
 
-   Parameters:
+    Parameters:
 
-   | Name     | Type   | Desc                        |
-   | -------- | ------ | --------------------------- |
-   | userId   | String | userId                      |
-   | password | String | password                    |
-   | appId    | String | (optional, deprecated)      |
-   | appName  | String | (optional) application name |
+    | Name     | Type   | Desc                        |
+    | -------- | ------ | --------------------------- |
+    | userId   | String | userId                      |
+    | password | String | password                    |
+    | appId    | String | (optional, deprecated)      |
+    | appName  | String | (optional) application name |
 
-   Example:
+    Example:
 
-   ```
-   {
-   	"command": "login",
-   	"arguments": {
-   		"userId": "1000",
-   		"password": "PASSWORD",
-   		"appId": "test",
-   		"appName": "test"
-   	}
-   }
-
-   ```
-
-   After successful login the system responds with the `status` message that can contain the String representing `streamSessionId` field:
-
-   ```
-   {
-   	"status": true,
-   	"streamSessionId": "8469308861804289383"
-   }
-
-   ```
-
-   The `streamSessionId` field of the string type, if present, is a token that can be used to establish a streaming subscription on a separate network connection. `streamSessionId` is used in streaming subscription commands.
-
-   `streamSessionId` is unique for the given main session and will change between login sessions.
-
-2. ### Logout
-
-   Format of input:
-
-   ```
-   {
-   	"command": "logout"
-   }
-   ```
-
-   No `returnData` field in output. Only `status` message is sent.
-
-3. ### Retrieving trading data
-
-   1. #### Command: **getAllSymbols**
-
-      Description: Returns array of all symbols available for the user.
-
-      ##### Request:
-
-      Example:
-
-      ```
-      {
-      	"command": "getAllSymbols"
-      }
-      ```
-
-      ##### Response:
-
-      Parameters:
-
-      | name | type  | description                                                                            |
-      | ---- | ----- | -------------------------------------------------------------------------------------- |
-      |      | array | Array of [`SYMBOL_RECORD `](http://developers.xstore.pro/documentation/#SYMBOL_RECORD) |
-
-      Example:
-
-      ```
-      {
-      	"status": true,
-      	"returnData": [SYMBOL_RECORD, SYMBOL_RECORD, ...]
-      }
-      ```
-
-      **Format of** `SYMBOL_RECORD`:
-
-      Please be advised that result values for profit and margin calculation can be used optionally, because server is able to perform all profit/margin calculations for Client application by commands described later in this document.
-
-      | name               | type            | description                                                                                                                |
-      | ------------------ | --------------- | -------------------------------------------------------------------------------------------------------------------------- |
-      | ask                | Floating number | Ask price in base currency                                                                                                 |
-      | bid                | Floating number | Bid price in base currency                                                                                                 |
-      | categoryName       | String          | Category name                                                                                                              |
-      | contractSize       | Number          | Size of 1 lot                                                                                                              |
-      | currency           | String          | Currency                                                                                                                   |
-      | currencyPair       | Boolean         | Indicates whether the symbol represents a currency pair                                                                    |
-      | currencyProfit     | String          | The currency of calculated profit                                                                                          |
-      | description        | String          | Description                                                                                                                |
-      | expiration         | Time            | Null if not applicable                                                                                                     |
-      | groupName          | String          | Symbol group name                                                                                                          |
-      | high               | Floating number | The highest price of the day in base currency                                                                              |
-      | initialMargin      | Number          | Initial margin for 1 lot order, used for profit/margin calculation                                                         |
-      | instantMaxVolume   | Number          | Maximum instant volume multiplied by 100 (in lots)                                                                         |
-      | leverage           | Floating number | Symbol leverage                                                                                                            |
-      | longOnly           | Boolean         | Long only                                                                                                                  |
-      | lotMax             | Floating number | Maximum size of trade                                                                                                      |
-      | lotMin             | Floating number | Minimum size of trade                                                                                                      |
-      | lotStep            | Floating number | A value of minimum step by which the size of trade can be changed (within `lotMin` \- `lotMax` range)                      |
-      | low                | Floating number | The lowest price of the day in base currency                                                                               |
-      | marginHedged       | Number          | Used for profit calculation                                                                                                |
-      | marginHedgedStrong | Boolean         | For margin calculation                                                                                                     |
-      | marginMaintenance  | Number          | For margin calculation, null if not applicable                                                                             |
-      | marginMode         | Number          | For margin calculation                                                                                                     |
-      | percentage         | Floating number | Percentage                                                                                                                 |
-      | pipsPrecision      | Number          | Number of symbol's pip decimal places                                                                                      |
-      | precision          | Number          | Number of symbol's price decimal places                                                                                    |
-      | profitMode         | Number          | For profit calculation                                                                                                     |
-      | quoteId            | Number          | Source of price                                                                                                            |
-      | shortSelling       | Boolean         | Indicates whether short selling is allowed on the instrument                                                               |
-      | spreadRaw          | Floating number | The difference between raw ask and bid prices                                                                              |
-      | spreadTable        | Floating number | Spread representation                                                                                                      |
-      | starting           | Time            | Null if not applicable                                                                                                     |
-      | stepRuleId         | Number          | Appropriate step rule ID from [`getStepRules `](http://developers.xstore.pro/documentation/#getStepRules) command response |
-      | stopsLevel         | Number          | Minimal distance (in pips) from the current price where the stopLoss/takeProfit can be set                                 |
-      | swap_rollover3days | Number          | Time when additional swap is accounted for weekend                                                                         |
-      | swapEnable         | Boolean         | Indicates whether swap value is added to position on end of day                                                            |
-      | swapLong           | Floating number | Swap value for long positions in pips                                                                                      |
-      | swapShort          | Floating number | Swap value for short positions in pips                                                                                     |
-      | swapType           | Number          | Type of swap calculated                                                                                                    |
-      | symbol             | String          | Symbol name                                                                                                                |
-      | tickSize           | Floating number | Smallest possible price change, used for profit/margin calculation, null if not applicable                                 |
-      | tickValue          | Floating number | Value of smallest possible price change (in base currency), used for profit/margin calculation, null if not applicable     |
-      | time               | Time            | Ask & bid tick time                                                                                                        |
-      | timeString         | String          | Time in String                                                                                                             |
-      | trailingEnabled    | Boolean         | Indicates whether trailing stop (offset) is applicable to the instrument.                                                  |
-      | type               | Number          | Instrument class number                                                                                                    |
-
-      Example:
-
-      ```
-      {
-      	"ask": 4000.0,
-      	"bid": 4000.0,
-      	"categoryName": "Forex",
-      	"contractSize": 100000,
-      	"currency": "USD",
-      	"currencyPair": true,
-      	"currencyProfit": "SEK",
-      	"description": "USD/PLN",
-      	"expiration": null,
-      	"groupName": "Minor",
-      	"high": 4000.0,
-      	"initialMargin": 0,
-      	"instantMaxVolume": 0,
-      	"leverage": 1.5,
-      	"longOnly": false,
-      	"lotMax": 10.0,
-      	"lotMin": 0.1,
-      	"lotStep": 0.1,
-      	"low": 3500.0,
-      	"marginHedged": 0,
-      	"marginHedgedStrong": false,
-      	"marginMaintenance": null,
-      	"marginMode": 101,
-      	"percentage": 100.0,
-      	"precision": 2,
-      	"profitMode": 5,
-      	"quoteId": 1,
-      	"shortSelling": true,
-      	"spreadRaw": 0.000003,
-      	"spreadTable": 0.00042,
-      	"starting": null,
-      	"stepRuleId": 1,
-      	"stopsLevel": 0,
-      	"swap_rollover3days": 0,
-      	"swapEnable": true,
-      	"swapLong": -2.55929,
-      	"swapShort": 0.131,
-      	"swapType": 0,
-      	"symbol": "USDPLN",
-      	"tickSize": 1.0,
-      	"tickValue": 1.0,
-      	"time": 1272446136891,
-      	"timeString": "Thu May 23 12:23:44 EDT 2013",
-      	"trailingEnabled": true,
-      	"type": 21
-      }
-      ```
-
-      **Possible values of** `quoteId` **field:**
-
-      | name  | value | description |
-      | ----- | ----- | ----------- |
-      | fixed | 1     | fixed       |
-      | float | 2     | float       |
-      | depth | 3     | depth       |
-      | cross | 4     | cross       |
-
-      **Possible values of** `marginMode` **field:**
-
-      | name          | value | description   |
-      | ------------- | ----- | ------------- |
-      | Forex         | 101   | Forex         |
-      | CFD leveraged | 102   | CFD leveraged |
-      | CFD           | 103   | CFD           |
-
-      **Possible values of** `profitMode` **field:**
-
-      | name  | value | description |
-      | ----- | ----- | ----------- |
-      | FOREX | 5     | FOREX       |
-      | CFD   | 6     | CFD         |
-
-   2. #### Command: **getCalendar**
-
-      Description: Returns calendar with market events.
-
-      ##### Request:
-
-      Example:
-
-      ```
-      {
-      	"command": "getCalendar"
-      }
-      ```
-
-      ##### Response:
-
-      Parameters:
-
-      | name | type  | description                                                                                |
-      | ---- | ----- | ------------------------------------------------------------------------------------------ |
-      |      | array | Array of [`CALENDAR_RECORD `](http://developers.xstore.pro/documentation/#CALENDAR_RECORD) |
-
-      Example:
-
-      ```
-      {
-      	"status": true,
-      	"returnData": [CALENDAR_RECORD, CALENDAR_RECORD, ...]
-      }
-      ```
-
-      **Format of** `CALENDAR_RECORD`:
-
-      | name     | type   | description                                                                                                                  |
-      | -------- | ------ | ---------------------------------------------------------------------------------------------------------------------------- |
-      | country  | String | Two letter country code                                                                                                      |
-      | current  | String | Market value (current), empty before time of release of this value (time from "time" record)                                 |
-      | forecast | String | Forecasted value                                                                                                             |
-      | impact   | String | Impact on market                                                                                                             |
-      | period   | String | Information period                                                                                                           |
-      | previous | String | Value from previous information release                                                                                      |
-      | time     | Time   | Time, when the information will be released (in this time empty "current" value should be changed with exact released value) |
-      | title    | String | Name of the indicator for which values will be released                                                                      |
-
-      Example:
-
-      ```
-      {
-      	"country": "CA",
-      	"current": "",
-      	"forecast": "",
-      	"impact": "3",
-      	"period": "(FEB)",
-      	"previous": "58.3",
-      	"time": 1374846900000,
-      	"title": "Ivey Purchasing Managers Index"
-      }
-      ```
-
-      **Possible values of** `impact` **field:**
-
-      | name   | value | description |
-      | ------ | ----- | ----------- |
-      | low    | 1     | low         |
-      | medium | 2     | medium      |
-      | high   | 3     | high        |
-
-   3. #### Command: **getChartLastRequest**
-
-      Description: **Please note that this function can be usually replaced by its streaming equivalent [`getCandles `](http://developers.xstore.pro/documentation/#streamgetCandles) which is the preferred way of retrieving current candle data.** Returns chart info, from start date to the current time. If the chosen period of [`CHART_LAST_INFO_RECORD `](http://developers.xstore.pro/documentation/#CHART_LAST_INFO_RECORD) is greater than 1 minute, the last candle returned by the API can change until the end of the period (the candle is being automatically updated every minute).
-
-      Limitations: there are limitations in charts data availability. Detailed ranges for charts data, what can be accessed with specific period, are as follows:
-
-      PERIOD_M1 --- <0-1) month, i.e. one month time
-
-      PERIOD_M30 --- <1-7) month, six months time
-
-      PERIOD_H4 --- <7-13) month, six months time
-
-      PERIOD_D1 --- 13 month, and earlier on
-
-      Note, that specific PERIOD\_ is the lowest (i.e. the most detailed) period, accessible in listed range. For instance, in months range <1-7) you can access periods: PERIOD_M30, PERIOD_H1, PERIOD_H4, PERIOD_D1, PERIOD_W1, PERIOD_MN1. Specific data ranges availability is guaranteed, however those ranges may be wider, e.g.: PERIOD_M1 may be accessible for 1.5 months back from now, where 1.0 months is guaranteed.
-
-      Example scenario:
-
-      - request charts of 5 minutes period, for 3 months time span, back from now;
-      - response: you are guaranteed to get 1 month of 5 minutes charts; because, 5 minutes period charts are not accessible 2 months and 3 months back from now.
-
-      ##### Request:
-
-      Parameters:
-
-      | name | type                   | description |
-      | ---- | ---------------------- | ----------- |
-      | info | CHART_LAST_INFO_RECORD | info        |
-
-      Example:
-
-      ```
-      {
-      	"command": "getChartLastRequest",
-      	"arguments": {
-      		"info": CHART_LAST_INFO_RECORD
-      	}
-      }
-      ```
-
-      **Format of** `CHART_LAST_INFO_RECORD`:
-
-      | name   | type   | description                                                               |
-      | ------ | ------ | ------------------------------------------------------------------------- |
-      | period | Number | Period code                                                               |
-      | start  | Time   | Start of chart block (rounded down to the nearest interval and excluding) |
-      | symbol | String | Symbol                                                                    |
-
-      Example:
-
-      ```
-      {
-      	"period": 5,
-      	"start": 1262944112000,
-      	"symbol": "PKN.PL"
-      }
-      ```
-
-      **Possible values of** `period` **field:**
-
-      | name       | value | description             |
-      | ---------- | ----- | ----------------------- |
-      | PERIOD_M1  | 1     | 1 minute                |
-      | PERIOD_M5  | 5     | 5 minutes               |
-      | PERIOD_M15 | 15    | 15 minutes              |
-      | PERIOD_M30 | 30    | 30 minutes              |
-      | PERIOD_H1  | 60    | 60 minutes (1 hour)     |
-      | PERIOD_H4  | 240   | 240 minutes (4 hours)   |
-      | PERIOD_D1  | 1440  | 1440 minutes (1 day)    |
-      | PERIOD_W1  | 10080 | 10080 minutes (1 week)  |
-      | PERIOD_MN1 | 43200 | 43200 minutes (30 days) |
-
-      ##### Response:
-
-      Parameters:
-
-      | name      | type   | description                                                                                  |
-      | --------- | ------ | -------------------------------------------------------------------------------------------- |
-      | digits    | Number | Number of decimal places                                                                     |
-      | rateInfos | array  | Array of [`RATE_INFO_RECORD `](http://developers.xstore.pro/documentation/#RATE_INFO_RECORD) |
-
-      Example:
-
-      ```
-      {
-      	"status": true,
-      	"returnData": {
-      		"digits": 4,
-      		"rateInfos": [RATE_INFO_RECORD, RATE_INFO_RECORD, ...]
-      	}
-      }
-      ```
-
-      **Format of** `RATE_INFO_RECORD`:
-
-      Price values must be divided by 10 to the power of digits in order to obtain exact prices.
-
-      | name      | type            | description                                                               |
-      | --------- | --------------- | ------------------------------------------------------------------------- |
-      | close     | Floating number | Value of close price (shift from open price)                              |
-      | ctm       | Time            | Candle start time in CET / CEST time zone (see Daylight Saving Time, DST) |
-      | ctmString | String          | String representation of the 'ctm' field                                  |
-      | high      | Floating number | Highest value in the given period (shift from open price)                 |
-      | low       | Floating number | Lowest value in the given period (shift from open price)                  |
-      | open      | Floating number | Open price (in base currency \* 10 to the power of digits)                |
-      | vol       | Floating number | Volume in lots                                                            |
-
-      Example:
-
-      ```
-      {
-      	"close": 1.0,
-      	"ctm": 1389362640000,
-      	"ctmString": "Jan 10, 2014 3:04:00 PM",
-      	"high": 6.0,
-      	"low": 0.0,
-      	"open": 41848.0,
-      	"vol": 0.0
-      }
-      ```
-
-   4. #### Command: **getChartRangeRequest**
-
-          Description: **Please note that this function can be usually replaced by its streaming equivalent [`getCandles `](http://developers.xstore.pro/documentation/#streamgetCandles) which is the preferred way of retrieving current candle data.** Returns chart info with data between given start and end dates.
-
-          Limitations: there are limitations in charts data availability. Detailed ranges for charts data, what can be accessed with specific period, are as follows:
-
-          PERIOD\_M1 --- <0-1) month, i.e. one month time
-
-           PERIOD\_M30 --- <1-7) month, six months time
-
-           PERIOD\_H4 --- <7-13) month, six months time
-
-           PERIOD\_D1 --- 13 month, and earlier on
-
-          Note, that specific PERIOD\_ is the lowest (i.e. the most detailed) period, accessible in listed range. For instance, in months range <1-7) you can access periods: PERIOD\_M30, PERIOD\_H1, PERIOD\_H4, PERIOD\_D1, PERIOD\_W1, PERIOD\_MN1. Specific data ranges availability is guaranteed, however those ranges may be wider, e.g.: PERIOD\_M1 may be accessible for 1.5 months back from now, where 1.0 months is guaranteed.
-
-          ##### Request:
-
-          Parameters:
-
-          | name | type | description |
-          | --- | --- | --- |
-          | info | CHART\_RANGE\_INFO\_RECORD | info |
-
-          Example:
-
-          ```
-          {
-          	"command": "getChartRangeRequest",
-          	"arguments": {
-          		"info": CHART_RANGE_INFO_RECORD
-          	}
-          }
-          ```
-
-          **Format of** `CHART_RANGE_INFO_RECORD`:
-
-          Ticks field - if ticks is not set or value is 0, [`getChartRangeRequest `](http://developers.xstore.pro/documentation/#getChartRangeRequest) works as before (you must send valid `start` and `end` time fields).
-
-           If ticks value is not equal to 0, field `end` is ignored.
-
-           If ticks >0 (e.g. N) then API returns N candles from time start.
-
-           If ticks <0 then API returns N candles to time start.
-
-           It is possible for API to return fewer chart candles than set in tick field.
-
-          | name | type | description |
-          | --- | --- | --- |
-          | end | Time | End of chart block (rounded down to the nearest interval and excluding) |
-          | period | Number | Period code |
-          | start | Time | Start of chart block (rounded down to the nearest interval and excluding) |
-          | symbol | String | Symbol |
-          | ticks | Number | Number of ticks needed, this field is optional, please read the description above |
-
-          Example:
-
-          ```
-          {
-          	"end": 1262944412000,
-          	"period": 5,
-          	"start": 1262944112000,
-          	"symbol": "PKN.PL",
-          	"ticks": 0
-          }
-          ```
-
-          **Possible values of** `period` **field:**
-
-          | name | value | description |
-          | --- | --- | --- |
-          | PERIOD\_M1 | 1 | 1 minute |
-          | PERIOD\_M5 | 5 | 5 minutes |
-          | PERIOD\_M15 | 15 | 15 minutes |
-          | PERIOD\_M30 | 30 | 30 minutes |
-          | PERIOD\_H1 | 60 | 60 minutes (1 hour) |
-          | PERIOD\_H4 | 240 | 240 minutes (4 hours) |
-          | PERIOD\_D1 | 1440 | 1440 minutes (1 day) |
-          | PERIOD\_W1 | 10080 | 10080 minutes (1 week) |
-          | rateInfos | array | Array of [`RATE_INFO_RECORD `](http://developers.xstore.pro/documentation/#RATE_INFO_RECORD) |
-
-
-          Example:
-
-
-          ```
-          {
-          	"status": true,
-          	"returnData": {
-          		"digits": 4,
-          		"rateInfos": [RATE_INFO_RECORD, RATE_INFO_RECORD, ...]
-          	}
-          }
-          ```
-
-
-          **Format of** `RATE_INFO_RECORD`:
-
-
-
-          Price values must be divided by 10 to the power of digits in order to obtain exact prices.
-
-
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | close | Floating number | Value of close price (shift from open price) |
-          | ctm | Time | Candle start time in CET / CEST time zone (see Daylight Saving Time, DST) |
-          | ctmString | String | String representation of the 'ctm' field |
-          | high | Floating number | Highest value in the given period (shift from open price) |
-          | low | Floating number | Lowest value in the given period (shift from open price) |
-          | open | Floating number | Open price (in base currency \* 10 to the power of digits) |
-          | vol | Floating number | Volume in lots |
-
-
-          Example:
-
-
-          ```
-          {
-          	"close": 1.0,
-          	"ctm": 1389362640000,
-          	"ctmString": "Jan 10, 2014 3:04:00 PM",
-          	"high": 6.0,
-          	"low": 0.0,
-          	"open": 41848.0,
-          	"vol": 0.0
-          }
-          ```
-
-      05. #### Command: **getCommissionDef**
-
-
-          Description: Returns calculation of commission and rate of exchange. The value is calculated as expected value, and therefore might not be perfectly accurate.
-
-
-          ##### Request:
-
-
-          Parameters:
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | symbol | String | symbol |
-          | volume | Floating number | volume |
-
-
-          Example:
-
-
-          ```
-          {
-          	"command": "getCommissionDef",
-          	"arguments": {
-          		"symbol": "T.US",
-          		"volume": 1.0
-          	}
-          }
-          ```
-
-
-
-          ##### Response:
-
-
-          Parameters:
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | commission | Floating number | calculated commission in account currency, could be null if not applicable |
-          | rateOfExchange | Floating number | rate of exchange between account currency and instrument base currency, could be null if not applicable |
-
-
-          Example:
-
-
-          ```
-          {
-          	"status": true,
-          	"returnData": {
-          		"commission": 0.51,
-          		"rateOfExchange": 0.1609
-          	}
-          }
-          ```
-
-      06. #### Command: **getCurrentUserData**
-
-
-          Description: Returns information about account currency, and account leverage.
-
-
-          ##### Request:
-
-
-          Example:
-
-
-          ```
-          {
-          	"command": "getCurrentUserData"
-          }
-          ```
-
-
-
-          ##### Response:
-
-
-          Parameters:
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | companyUnit | Number | Unit the account is assigned to. |
-          | currency | String | account currency |
-          | group | String | group |
-          | ibAccount | Boolean | Indicates whether this account is an IB account. |
-          | leverage | Number | This field should not be used. It is inactive and its value is always 1. |
-          | leverageMultiplier | Floating number | The factor used for margin calculations. The actual value of leverage can be calculated by dividing this value by 100. |
-          | spreadType | String | spreadType, null if not applicable |
-          | trailingStop | Boolean | Indicates whether this account is enabled to use trailing stop. |
-
-
-          Example:
-
-
-          ```
-          {
-          	"status": true,
-          	"returnData": {
-          		"companyUnit": 8,
-          		"currency": "PLN",
-          		"group": "demoPLeurSTANDARD200",
-          		"ibAccount": false,
-          		"leverage": 1,
-          		"leverageMultiplier": 0.25,
-          		"spreadType": "FLOAT",
-          		"trailingStop": false
-          	}
-          }
-          ```
-
-      07. #### Command: **getIbsHistory**
-
-
-          Description: Returns IBs data from the given time range.
-
-
-          ##### Request:
-
-
-          Parameters:
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | end | Time | End of IBs history block |
-          | start | Time | Start of IBs history block |
-
-
-          Example:
-
-
-          ```
-          {
-          	"command": "getIbsHistory",
-          	"arguments": {
-          		"end": 1395053810991,
-          		"start": 1394449010991
-          	}
-          }
-          ```
-
-
-
-          ##### Response:
-
-
-          Parameters:
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          |  | array | Array of [`IB_RECORD `](http://developers.xstore.pro/documentation/#IB_RECORD) |
-
-
-          Example:
-
-
-          ```
-          {
-          	"status": true,
-          	"returnData": [IB_RECORD, IB_RECORD, ...]
-          }
-          ```
-
-
-          **Format of** `IB_RECORD`:
-
-
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | closePrice | Floating number | IB close price or null if not allowed to view |
-          | login | String | IB user login or null if not allowed to view |
-          | nominal | Floating number | IB nominal or null if not allowed to view |
-          | openPrice | Floating number | IB open price or null if not allowed to view |
-          | side | Number | Operation code or null if not allowed to view |
-          | surname | String | IB user surname or null if not allowed to view |
-          | symbol | String | Symbol or null if not allowed to view |
-          | timestamp | Time | Time the record was created or null if not allowed to view |
-          | volume | Floating number | Volume in lots or null if not allowed to view |
-
-
-          Example:
-
-
-          ```
-          {
-          	"closePrice": 1.39302,
-          	"login": "12345",
-          	"nominal": 6.00,
-          	"openPrice": 1.39376,
-          	"side": 0,
-          	"surname": "IB_Client_1",
-          	"symbol": "EURUSD",
-          	"timestamp": 1395755870000,
-          	"volume": 1.0
-          }
-          ```
-
-
-          **Possible values of** `side` **field:**
-
-
-
-          | name | value | description |
-          | --- | --- | --- |
-          | BUY | 0 | buy |
-          | SELL | 1 | sell |
-
-      08. #### Command: **getMarginLevel**
-
-
-          Description: **Please note that this function can be usually replaced by its streaming equivalent [`getBalance `](http://developers.xstore.pro/documentation/#streamgetBalance) which is the preferred way of retrieving account indicators.** Returns various account indicators.
-
-
-          ##### Request:
-
-
-          Example:
-
-
-          ```
-          {
-          	"command": "getMarginLevel"
-          }
-          ```
-
-
-
-          ##### Response:
-
-
-          Parameters:
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | balance | Floating number | balance in account currency |
-          | credit | Floating number | credit |
-          | currency | String | user currency |
-          | equity | Floating number | sum of balance and all profits in account currency |
-          | margin | Floating number | margin requirements in account currency |
-          | margin\_free | Floating number | free margin in account currency |
-          | margin\_level | Floating number | margin level percentage |
-
-
-          Example:
-
-
-          ```
-          {
-          	"status": true,
-          	"returnData": {
-          		"balance": 995800269.43,
-          		"credit": 1000.00,
-          		"currency": "PLN",
-          		"equity": 995985397.56,
-          		"margin": 572634.43,
-          		"margin_free": 995227635.00,
-          		"margin_level": 173930.41
-          	}
-          }
-          ```
-
-      09. #### Command: **getMarginTrade**
-
-
-          Description: Returns expected margin for given instrument and volume. The value is calculated as expected margin value, and therefore might not be perfectly accurate.
-
-
-          ##### Request:
-
-
-          Parameters:
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | symbol | String | symbol |
-          | volume | Floating number | volume |
-
-
-          Example:
-
-
-          ```
-          {
-          	"command": "getMarginTrade",
-          	"arguments": {
-          		"symbol": "EURPLN",
-          		"volume": 1.0
-          	}
-          }
-          ```
-
-
-
-          ##### Response:
-
-
-          Parameters:
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | margin | Floating number | calculated margin in account currency |
-
-
-          Example:
-
-
-          ```
-          {
-          	"status": true,
-          	"returnData": {
-          		"margin": 4399.350
-          	}
-          }
-          ```
-
-      10. #### Command: **getNews**
-
-
-          Description: **Please note that this function can be usually replaced by its streaming equivalent [`getNews `](http://developers.xstore.pro/documentation/#streamgetNews) which is the preferred way of retrieving news data.** Returns news from trading server which were sent within specified period of time.
-
-
-          ##### Request:
-
-
-          Parameters:
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | end | Time | Time, 0 means current time for simplicity |
-          | start | Time | Time |
-
-
-          Example:
-
-
-          ```
-          {
-          	"command": "getNews",
-          	"arguments": {
-          		"end": 0,
-          		"start": 1275993488000
-          	}
-          }
-          ```
-
-
-
-          ##### Response:
-
-
-          Parameters:
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          |  | array | Array of [`NEWS_TOPIC_RECORD `](http://developers.xstore.pro/documentation/#NEWS_TOPIC_RECORD) |
-
-
-          Example:
-
-
-          ```
-          {
-          	"status": true,
-          	"returnData": [NEWS_TOPIC_RECORD, NEWS_TOPIC_RECORD, ...]
-          }
-          ```
-
-
-          **Format of** `NEWS_TOPIC_RECORD`:
-
-
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | body | String | Body |
-          | bodylen | Number | Body length |
-          | key | String | News key |
-          | time | Time | Time |
-          | timeString | String | Time string |
-          | title | String | News title |
-
-
-          Example:
-
-
-          ```
-          {
-          	"body": "<html>...</html>",
-          	"bodylen": 110,
-          	"key": "1f6da766abd29927aa854823f0105c23",
-          	"time": 1262944112000,
-          	"timeString": "May 17, 2013 4:30:00 PM",
-          	"title": "Breaking trend"
-          }
-          ```
-
-      11. #### Command: **getProfitCalculation**
-
-
-          Description: Calculates estimated profit for given deal data Should be used for calculator-like apps only. Profit for opened transactions should be taken from server, due to higher precision of server calculation.
-
-
-          ##### Request:
-
-
-          Parameters:
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | closePrice | Floating number | theoretical close price of order |
-          | cmd | Number | Operation code |
-          | openPrice | Floating number | theoretical open price of order |
-          | symbol | String | symbol |
-          | volume | Floating number | volume |
-
-
-          Example:
-
-
-          ```
-          {
-          	"command": "getProfitCalculation",
-          	"arguments": {
-          		"closePrice": 1.3000,
-          		"cmd": 0,
-          		"openPrice": 1.2233,
-          		"symbol": "EURPLN",
-          		"volume": 1.0
-          	}
-          }
-          ```
-
-
-          **Possible values of** `cmd` **field:**
-
-
-
-          | name | value | description |
-          | --- | --- | --- |
-          | BUY | 0 | buy |
-          | SELL | 1 | sell |
-          | BUY\_LIMIT | 2 | buy limit |
-          | SELL\_LIMIT | 3 | sell limit |
-          | BUY\_STOP | 4 | buy stop |
-          | SELL\_STOP | 5 | sell stop |
-          | BALANCE | 6 | Read only. Used in [`getTradesHistory `](http://developers.xstore.pro/documentation/#getTradesHistory) for manager's deposit/withdrawal operations (profit>0 for deposit, profit<0 for withdrawal). |
-          | CREDIT | 7 | Read only |
-
-
-
-          ##### Response:
-
-
-          Parameters:
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | profit | Floating number | Profit in account currency |
-
-
-          Example:
-
-
-          ```
-          {
-          	"status": true,
-          	"returnData": {
-          		"profit": 714.303
-          	}
-          }
-          ```
-
-      12. #### Command: **getServerTime**
-
-
-          Description: Returns current time on trading server.
-
-
-          ##### Request:
-
-
-          Example:
-
-
-          ```
-          {
-          	"command": "getServerTime"
-          }
-          ```
-
-
-
-          ##### Response:
-
-
-          Parameters:
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | time | Time | Time |
-          | timeString | String | Time described in form set on server (local time of server) |
-
-
-          Example:
-
-
-          ```
-          {
-          	"status": true,
-          	"returnData": {
-          		"time": 1392211379731,
-          		"timeString": "Feb 12, 2014 2:22:59 PM"
-          	}
-          }
-          ```
-
-      13. #### Command: **getStepRules**
-
-
-          Description: Returns a list of step rules for DMAs.
-
-
-          ##### Request:
-
-
-          Example:
-
-
-          ```
-          {
-          	"command": "getStepRules"
-          }
-          ```
-
-
-
-          ##### Response:
-
-
-          Parameters:
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          |  | array | Array of [`STEP_RULE_RECORD `](http://developers.xstore.pro/documentation/#STEP_RULE_RECORD) |
-
-
-          Example:
-
-
-          ```
-          {
-          	"status": true,
-          	"returnData": [STEP_RULE_RECORD, STEP_RULE_RECORD, ...]
-          }
-          ```
-
-
-          **Format of** `STEP_RULE_RECORD`:
-
-
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | id | Number | Step rule ID |
-          | name | String | Step rule name |
-          | steps | array | Array of [`STEP_RECORD `](http://developers.xstore.pro/documentation/#STEP_RECORD) |
-
-
-          Example:
-
-
-          ```
-          {
-          	"id": 1,
-          	"name": "Forex",
-          	"steps": [STEP_RECORD, STEP_RECORD, ...]
-          }
-          ```
-
-
-          **Format of** `STEP_RECORD`:
-
-
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | fromValue | Floating number | Lower border of the volume range |
-          | step | Floating number | lotStep value in the given volume range |
-
-
-          Example:
-
-
-          ```
-          {
-          	"fromValue": 0.1,
-          	"step": 0.0025
-          }
-          ```
-
-      14. #### Command: **getSymbol**
-
-
-          Description: Returns information about symbol available for the user.
-
-
-          ##### Request:
-
-
-          Parameters:
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | symbol | String | symbol |
-
-
-          Example:
-
-
-          ```
-          {
-          	"command": "getSymbol",
-          	"arguments": {
-          		"symbol": "EURPLN"
-          	}
-          }
-          ```
-
-
-
-          ##### Response:
-
-
-          Parameters:
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          |  | SYMBOL\_RECORD | [`SYMBOL_RECORD `](http://developers.xstore.pro/documentation/#SYMBOL_RECORD) |
-
-
-          Example:
-
-
-          ```
-          {
-          	"status": true,
-          	"returnData": SYMBOL_RECORD
-          }
-          ```
-
-
-          **Format of** `SYMBOL_RECORD`:
-
-          Please be advised that result values for profit and margin calculation can be used optionally, because server is able to perform all profit/margin calculations for Client application by commands described later in this document.
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | ask | Floating number | Ask price in base currency |
-          | bid | Floating number | Bid price in base currency |
-          | categoryName | String | Category name |
-          | contractSize | Number | Size of 1 lot |
-          | currency | String | Currency |
-          | currencyPair | Boolean | Indicates whether the symbol represents a currency pair |
-          | currencyProfit | String | The currency of calculated profit |
-          | description | String | Description |
-          | expiration | Time | Null if not applicable |
-          | groupName | String | Symbol group name |
-          | high | Floating number | The highest price of the day in base currency |
-          | initialMargin | Number | Initial margin for 1 lot order, used for profit/margin calculation |
-          | instantMaxVolume | Number | Maximum instant volume multiplied by 100 (in lots) |
-          | leverage | Floating number | Symbol leverage |
-          | longOnly | Boolean | Long only |
-          | lotMax | Floating number | Maximum size of trade |
-          | lotMin | Floating number | Minimum size of trade |
-          | lotStep | Floating number | A value of minimum step by which the size of trade can be changed (within `lotMin` \- `lotMax` range) |
-          | low | Floating number | The lowest price of the day in base currency |
-          | marginHedged | Number | Used for profit calculation |
-          | marginHedgedStrong | Boolean | For margin calculation |
-          | marginMaintenance | Number | For margin calculation, null if not applicable |
-          | marginMode | Number | For margin calculation |
-          | percentage | Floating number | Percentage |
-          | pipsPrecision | Number | Number of symbol's pip decimal places |
-          | precision | Number | Number of symbol's price decimal places |
-          | profitMode | Number | For profit calculation |
-          | quoteId | Number | Source of price |
-          | shortSelling | Boolean | Indicates whether short selling is allowed on the instrument |
-          | spreadRaw | Floating number | The difference between raw ask and bid prices |
-          | spreadTable | Floating number | Spread representation |
-          | starting | Time | Null if not applicable |
-          | stepRuleId | Number | Appropriate step rule ID from [`getStepRules `](http://developers.xstore.pro/documentation/#getStepRules) command response |
-          | stopsLevel | Number | Minimal distance (in pips) from the current price where the stopLoss/takeProfit can be set |
-          | swap\_rollover3days | Number | Time when additional swap is accounted for weekend |
-          | swapEnable | Boolean | Indicates whether swap value is added to position on end of day |
-          | swapLong | Floating number | Swap value for long positions in pips |
-          | swapShort | Floating number | Swap value for short positions in pips |
-          | swapType | Number | Type of swap calculated |
-          | symbol | String | Symbol name |
-          | tickSize | Floating number | Smallest possible price change, used for profit/margin calculation, null if not applicable |
-          | tickValue | Floating number | Value of smallest possible price change (in base currency), used for profit/margin calculation, null if not applicable |
-          | time | Time | Ask & bid tick time |
-          | timeString | String | Time in String |
-          | trailingEnabled | Boolean | Indicates whether trailing stop (offset) is applicable to the instrument. |
-          | type | Number | Instrument class number |
-
-
-          Example:
-
-
-          ```
-          {
-          	"ask": 4000.0,
-          	"bid": 4000.0,
-          	"categoryName": "Forex",
-          	"contractSize": 100000,
-          	"currency": "USD",
-          	"currencyPair": true,
-          	"currencyProfit": "SEK",
-          	"description": "USD/PLN",
-          	"expiration": null,
-          	"groupName": "Minor",
-          	"high": 4000.0,
-          	"initialMargin": 0,
-          	"instantMaxVolume": 0,
-          	"leverage": 1.5,
-          	"longOnly": false,
-          	"lotMax": 10.0,
-          	"lotMin": 0.1,
-          	"lotStep": 0.1,
-          	"low": 3500.0,
-          	"marginHedged": 0,
-          	"marginHedgedStrong": false,
-          	"marginMaintenance": null,
-          	"marginMode": 101,
-          	"percentage": 100.0,
-          	"precision": 2,
-          	"profitMode": 5,
-          	"quoteId": 1,
-          	"shortSelling": true,
-          	"spreadRaw": 0.000003,
-          	"spreadTable": 0.00042,
-          	"starting": null,
-          	"stepRuleId": 1,
-          	"stopsLevel": 0,
-          	"swap_rollover3days": 0,
-          	"swapEnable": true,
-          	"swapLong": -2.55929,
-          	"swapShort": 0.131,
-          	"swapType": 0,
-          	"symbol": "USDPLN",
-          	"tickSize": 1.0,
-          	"tickValue": 1.0,
-          	"time": 1272446136891,
-          	"timeString": "Thu May 23 12:23:44 EDT 2013",
-          	"trailingEnabled": true,
-          	"type": 21
-          }
-          ```
-
-
-          **Possible values of** `quoteId` **field:**
-
-
-
-          | name | value | description |
-          | --- | --- | --- |
-          | fixed | 1 | fixed |
-          | float | 2 | float |
-          | depth | 3 | depth |
-          | cross | 4 | cross |
-
-
-          **Possible values of** `marginMode` **field:**
-
-
-
-          | name | value | description |
-          | --- | --- | --- |
-          | Forex | 101 | Forex |
-          | CFD leveraged | 102 | CFD leveraged |
-          | CFD | 103 | CFD |
-
-
-          **Possible values of** `profitMode` **field:**
-
-
-
-          | name | value | description |
-          | --- | --- | --- |
-          | FOREX | 5 | FOREX |
-          | CFD | 6 | CFD |
-
-      15. #### Command: **getTickPrices**
-
-
-          Description: **Please note that this function can be usually replaced by its streaming equivalent [`getTickPrices `](http://developers.xstore.pro/documentation/#streamgetTickPrices) which is the preferred way of retrieving ticks data.** Returns array of current quotations for given symbols, only quotations that changed from given timestamp are returned. New timestamp obtained from output will be used as an argument of the next call of this command.
-
-
-          ##### Request:
-
-
-          Parameters:
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | level | Number | price level |
-          | symbols | array | Array of symbol names (Strings) |
-          | timestamp | Time | The time from which the most recent tick should be looked for. Historical prices cannot be obtained using this parameter. It can only be used to verify whether a price has changed since the given time. |
-
-
-          Example:
-
-
-          ```
-          {
-          	"command": "getTickPrices",
-          	"arguments": {
-          		"level": 0,
-          		"symbols": ["EURPLN", "AGO.PL", ...],
-          		"timestamp": 1262944112000
-          	}
-          }
-          ```
-
-
-          **Possible values of** `level` **field:**
-
-
-
-          | name | value | description |
-          | --- | --- | --- |
-          |  | -1 | all available levels |
-          |  | 0 | base level bid and ask price for instrument |
-          |  | >0 | specified level |
-
-
-
-          ##### Response:
-
-
-          Parameters:
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | quotations | array | Array of [`TICK_RECORD `](http://developers.xstore.pro/documentation/#TICK_RECORD) |
-
-
-          Example:
-
-
-          ```
-          {
-          	"status": true,
-          	"returnData": {
-          		"quotations": [TICK_RECORD, TICK_RECORD, ...]
-          	}
-          }
-          ```
-
-
-          **Format of** `TICK_RECORD`:
-
-
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | ask | Floating number | Ask price in base currency |
-          | askVolume | Number | Number of available lots to buy at given price or null if not applicable |
-          | bid | Floating number | Bid price in base currency |
-          | bidVolume | Number | Number of available lots to buy at given price or null if not applicable |
-          | high | Floating number | The highest price of the day in base currency |
-          | level | Number | Price level |
-          | low | Floating number | The lowest price of the day in base currency |
-          | spreadRaw | Floating number | The difference between raw ask and bid prices |
-          | spreadTable | Floating number | Spread representation |
-          | symbol | String | Symbol |
-          | timestamp | Time | Timestamp |
-
-
-          Example:
-
-
-          ```
-          {
-          	"ask": 4000.0,
-          	"askVolume": 15000,
-          	"bid": 4000.0,
-          	"bidVolume": 16000,
-          	"high": 4000.0,
-          	"level": 0,
-          	"low": 3500.0,
-          	"spreadRaw": 0.000003,
-          	"spreadTable": 0.00042,
-          	"symbol": "KOMB.CZ",
-          	"timestamp": 1272529161605
-          }
-          ```
-
-
-          **Possible values of** `level` **field:**
-
-
-
-          | name | value | description |
-          | --- | --- | --- |
-          |  | -1 | all available levels |
-          |  | 0 | base level bid and ask price for instrument |
-          |  | >0 | specified level |
-
-      16. #### Command: **getTradeRecords**
-
-
-          Description: Returns array of trades listed in `orders` argument.
-
-
-          ##### Request:
-
-
-          Parameters:
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | orders | array | Array of orders (position numbers) |
-
-
-          Example:
-
-
-          ```
-          {
-          	"command": "getTradeRecords",
-          	"arguments": {
-          		"orders": [7489839, 7489841, ...]
-          	}
-          }
-          ```
-
-
-
-          ##### Response:
-
-
-          Parameters:
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          |  | array | Array of [`TRADE_RECORD `](http://developers.xstore.pro/documentation/#TRADE_RECORD) |
-
-
-          Example:
-
-
-          ```
-          {
-          	"status": true,
-          	"returnData": [TRADE_RECORD, TRADE_RECORD, ...]
-          }
-          ```
-
-
-          **Format of** `TRADE_RECORD`:
-
-          `cmd` is the operation code, for user's trade operations it equals to `cmd` from [`TRADE_TRANS_INFO `](http://developers.xstore.pro/documentation/#TRADE_TRANS_INFO) record used as an argument in [`tradeTransaction `](http://developers.xstore.pro/documentation/#tradeTransaction) command
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | close\_price | Floating number | Close price in base currency |
-          | close\_time | Time | Null if order is not closed |
-          | close\_timeString | String | Null if order is not closed |
-          | closed | Boolean | Closed |
-          | cmd | Number | Operation code |
-          | comment | String | Comment |
-          | commission | Floating number | Commission in account currency, null if not applicable |
-          | customComment | String | The value the customer may provide in order to retrieve it later. |
-          | digits | Number | Number of decimal places |
-          | expiration | Time | Null if order is not closed |
-          | expirationString | String | Null if order is not closed |
-          | margin\_rate | Floating number | Margin rate |
-          | offset | Number | Trailing offset |
-          | open\_price | Floating number | Open price in base currency |
-          | open\_time | Time | Open time |
-          | open\_timeString | String | Open time string |
-          | order | Number | Order number for opened transaction |
-          | order2 | Number | Order number for closed transaction |
-          | position | Number | Order number common both for opened and closed transaction |
-          | profit | Floating number | Profit in account currency |
-          | sl | Floating number | Zero if stop loss is not set (in base currency) |
-          | storage | Floating number | order swaps in account currency |
-          | symbol | String | symbol name or null for deposit/withdrawal operations |
-          | timestamp | Time | Timestamp |
-          | tp | Floating number | Zero if take profit is not set (in base currency) |
-          | volume | Floating number | Volume in lots |
-
-
-          Example:
-
-
-          ```
-          {
-          	"close_price": 1.3256,
-          	"close_time": null,
-          	"close_timeString": null,
-          	"closed": false,
-          	"cmd": 0,
-          	"comment": "Web Trader",
-          	"commission": 0.0,
-          	"customComment": "Some text",
-          	"digits": 4,
-          	"expiration": null,
-          	"expirationString": null,
-          	"margin_rate": 0.0,
-          	"offset": 0,
-          	"open_price": 1.4,
-          	"open_time": 1272380927000,
-          	"open_timeString": "Fri Jan 11 10:03:36 CET 2013",
-          	"order": 7497776,
-          	"order2": 1234567,
-          	"position": 1234567,
-          	"profit": -2196.44,
-          	"sl": 0.0,
-          	"storage": -4.46,
-          	"symbol": "EURUSD",
-          	"timestamp": 1272540251000,
-          	"tp": 0.0,
-          	"volume": 0.10
-          }
-          ```
-
-
-          **Possible values of** `cmd` **field:**
-
-
-
-          | name | value | description |
-          | --- | --- | --- |
-          | BUY | 0 | buy |
-          | SELL | 1 | sell |
-          | BUY\_LIMIT | 2 | buy limit |
-          | SELL\_LIMIT | 3 | sell limit |
-          | BUY\_STOP | 4 | buy stop |
-          | SELL\_STOP | 5 | sell stop |
-          | BALANCE | 6 | Read only. Used in [`getTradesHistory `](http://developers.xstore.pro/documentation/#getTradesHistory) for manager's deposit/withdrawal operations (profit>0 for deposit, profit<0 for withdrawal). |
-          | CREDIT | 7 | Read only |
-
-      17. #### Command: **getTrades**
-
-
-          Description: **Please note that this function can be usually replaced by its streaming equivalent [`getTrades `](http://developers.xstore.pro/documentation/#streamgetTrades) which is the preferred way of retrieving trades data.** Returns array of user's trades.
-
-
-          ##### Request:
-
-
-          Parameters:
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | openedOnly | boolean | if true then only opened trades will be returned |
-
-
-          Example:
-
-
-          ```
-          {
-          	"command": "getTrades",
-          	"arguments": {
-          		"openedOnly": true
-          	}
-          }
-          ```
-
-
-
-          ##### Response:
-
-
-          Parameters:
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          |  | array | Array of [`TRADE_RECORD `](http://developers.xstore.pro/documentation/#TRADE_RECORD) |
-
-
-          Example:
-
-
-          ```
-          {
-          	"status": true,
-          	"returnData": [TRADE_RECORD, TRADE_RECORD, ...]
-          }
-          ```
-
-
-          **Format of** `TRADE_RECORD`:
-
-          `cmd` is the operation code, for user's trade operations it equals to `cmd` from [`TRADE_TRANS_INFO `](http://developers.xstore.pro/documentation/#TRADE_TRANS_INFO) record used as an argument in [`tradeTransaction `](http://developers.xstore.pro/documentation/#tradeTransaction) command
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | close\_price | Floating number | Close price in base currency |
-          | close\_time | Time | Null if order is not closed |
-          | close\_timeString | String | Null if order is not closed |
-          | closed | Boolean | Closed |
-          | cmd | Number | Operation code |
-          | comment | String | Comment |
-          | commission | Floating number | Commission in account currency, null if not applicable |
-          | customComment | String | The value the customer may provide in order to retrieve it later. |
-          | digits | Number | Number of decimal places |
-          | expiration | Time | Null if order is not closed |
-          | expirationString | String | Null if order is not closed |
-          | margin\_rate | Floating number | Margin rate |
-          | offset | Number | Trailing offset |
-          | open\_price | Floating number | Open price in base currency |
-          | open\_time | Time | Open time |
-          | open\_timeString | String | Open time string |
-          | order | Number | Order number for opened transaction |
-          | order2 | Number | Order number for closed transaction |
-          | position | Number | Order number common both for opened and closed transaction |
-          | profit | Floating number | Profit in account currency |
-          | sl | Floating number | Zero if stop loss is not set (in base currency) |
-          | storage | Floating number | order swaps in account currency |
-          | symbol | String | symbol name or null for deposit/withdrawal operations |
-          | timestamp | Time | Timestamp |
-          | tp | Floating number | Zero if take profit is not set (in base currency) |
-          | volume | Floating number | Volume in lots |
-
-
-          Example:
-
-
-          ```
-          {
-          	"close_price": 1.3256,
-          	"close_time": null,
-          	"close_timeString": null,
-          	"closed": false,
-          	"cmd": 0,
-          	"comment": "Web Trader",
-          	"commission": 0.0,
-          	"customComment": "Some text",
-          	"digits": 4,
-          	"expiration": null,
-          	"expirationString": null,
-          	"margin_rate": 0.0,
-          	"offset": 0,
-          	"open_price": 1.4,
-          	"open_time": 1272380927000,
-          	"open_timeString": "Fri Jan 11 10:03:36 CET 2013",
-          	"order": 7497776,
-          	"order2": 1234567,
-          	"position": 1234567,
-          	"profit": -2196.44,
-          	"sl": 0.0,
-          	"storage": -4.46,
-          	"symbol": "EURUSD",
-          	"timestamp": 1272540251000,
-          	"tp": 0.0,
-          	"volume": 0.10
-          }
-          ```
-
-
-          **Possible values of** `cmd` **field:**
-
-
-
-          | name | value | description |
-          | --- | --- | --- |
-          | BUY | 0 | buy |
-          | SELL | 1 | sell |
-          | BUY\_LIMIT | 2 | buy limit |
-          | SELL\_LIMIT | 3 | sell limit |
-          | BUY\_STOP | 4 | buy stop |
-          | SELL\_STOP | 5 | sell stop |
-          | BALANCE | 6 | Read only. Used in [`getTradesHistory `](http://developers.xstore.pro/documentation/#getTradesHistory) for manager's deposit/withdrawal operations (profit>0 for deposit, profit<0 for withdrawal). |
-          | CREDIT | 7 | Read only |
-
-      18. #### Command: **getTradesHistory**
-
-
-          Description: **Please note that this function can be usually replaced by its streaming equivalent [`getTrades `](http://developers.xstore.pro/documentation/#streamgetTrades) which is the preferred way of retrieving trades data.** Returns array of user's trades which were closed within specified period of time.
-
-
-          ##### Request:
-
-
-          Parameters:
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | end | Time | Time, 0 means current time for simplicity |
-          | start | Time | Time, 0 means last month interval |
-
-
-          Example:
-
-
-          ```
-          {
-          	"command": "getTradesHistory",
-          	"arguments": {
-          		"end": 0,
-          		"start": 1275993488000
-          	}
-          }
-          ```
-
-
-
-          ##### Response:
-
-
-          Parameters:
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          |  | array | Array of [`TRADE_RECORD `](http://developers.xstore.pro/documentation/#TRADE_RECORD) |
-
-
-          Example:
-
-
-          ```
-          {
-          	"status": true,
-          	"returnData": [TRADE_RECORD, TRADE_RECORD, ...]
-          }
-          ```
-
-
-          **Format of** `TRADE_RECORD`:
-
-          `cmd` is the operation code, for user's trade operations it equals to `cmd` from [`TRADE_TRANS_INFO `](http://developers.xstore.pro/documentation/#TRADE_TRANS_INFO) record used as an argument in [`tradeTransaction `](http://developers.xstore.pro/documentation/#tradeTransaction) command
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | close\_price | Floating number | Close price in base currency |
-          | close\_time | Time | Null if order is not closed |
-          | close\_timeString | String | Null if order is not closed |
-          | closed | Boolean | Closed |
-          | cmd | Number | Operation code |
-          | comment | String | Comment |
-          | commission | Floating number | Commission in account currency, null if not applicable |
-          | customComment | String | The value the customer may provide in order to retrieve it later. |
-          | digits | Number | Number of decimal places |
-          | expiration | Time | Null if order is not closed |
-          | expirationString | String | Null if order is not closed |
-          | margin\_rate | Floating number | Margin rate |
-          | offset | Number | Trailing offset |
-          | open\_price | Floating number | Open price in base currency |
-          | open\_time | Time | Open time |
-          | open\_timeString | String | Open time string |
-          | order | Number | Order number for opened transaction |
-          | order2 | Number | Order number for closed transaction |
-          | position | Number | Order number common both for opened and closed transaction |
-          | profit | Floating number | Profit in account currency |
-          | sl | Floating number | Zero if stop loss is not set (in base currency) |
-          | storage | Floating number | order swaps in account currency |
-          | symbol | String | symbol name or null for deposit/withdrawal operations |
-          | timestamp | Time | Timestamp |
-          | tp | Floating number | Zero if take profit is not set (in base currency) |
-          | volume | Floating number | Volume in lots |
-
-
-          Example:
-
-
-          ```
-          {
-          	"close_price": 1.3256,
-          	"close_time": null,
-          	"close_timeString": null,
-          	"closed": false,
-          	"cmd": 0,
-          	"comment": "Web Trader",
-          	"commission": 0.0,
-          	"customComment": "Some text",
-          	"digits": 4,
-          	"expiration": null,
-          	"expirationString": null,
-          	"margin_rate": 0.0,
-          	"offset": 0,
-          	"open_price": 1.4,
-          	"open_time": 1272380927000,
-          	"open_timeString": "Fri Jan 11 10:03:36 CET 2013",
-          	"order": 7497776,
-          	"order2": 1234567,
-          	"position": 1234567,
-          	"profit": -2196.44,
-          	"sl": 0.0,
-          	"storage": -4.46,
-          	"symbol": "EURUSD",
-          	"timestamp": 1272540251000,
-          	"tp": 0.0,
-          	"volume": 0.10
-          }
-          ```
-
-
-          **Possible values of** `cmd` **field:**
-
-
-
-          | name | value | description |
-          | --- | --- | --- |
-          | BUY | 0 | buy |
-          | SELL | 1 | sell |
-          | BUY\_LIMIT | 2 | buy limit |
-          | SELL\_LIMIT | 3 | sell limit |
-          | BUY\_STOP | 4 | buy stop |
-          | SELL\_STOP | 5 | sell stop |
-          | BALANCE | 6 | Read only. Used in [`getTradesHistory `](http://developers.xstore.pro/documentation/#getTradesHistory) for manager's deposit/withdrawal operations (profit>0 for deposit, profit<0 for withdrawal). |
-          | CREDIT | 7 | Read only |
-
-      19. #### Command: **getTradingHours**
-
-
-          Description: Returns quotes and trading times.
-
-
-          ##### Request:
-
-
-          Parameters:
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | symbols | array | Array of symbol names (Strings) |
-
-
-          Example:
-
-
-          ```
-          {
-          	"command": "getTradingHours",
-          	"arguments": {
-          		"symbols": ["EURPLN", "AGO.PL", ...]
-          	}
-          }
-          ```
-
-
-
-          ##### Response:
-
-
-          Parameters:
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          |  | array | Array of [`TRADING_HOURS_RECORD `](http://developers.xstore.pro/documentation/#TRADING_HOURS_RECORD) |
-
-
-          Example:
-
-
-          ```
-          {
-          	"status": true,
-          	"returnData": [TRADING_HOURS_RECORD, TRADING_HOURS_RECORD, ...]
-          }
-          ```
-
-
-          **Format of** `TRADING_HOURS_RECORD`:
-
-
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | quotes | array | Array of [`QUOTES_RECORD `](http://developers.xstore.pro/documentation/#QUOTES_RECORD) |
-          | symbol | String | Symbol |
-          | trading | array | Array of [`TRADING_RECORD `](http://developers.xstore.pro/documentation/#TRADING_RECORD) |
-
-
-          Example:
-
-
-          ```
-          {
-          	"quotes": [QUOTES_RECORD, QUOTES_RECORD, ...],
-          	"symbol": "USDPLN",
-          	"trading": [TRADING_RECORD, TRADING_RECORD, ...]
-          }
-          ```
-
-
-          **Format of** `QUOTES_RECORD`:
-
-
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | day | Number | Day of week |
-          | fromT | Time | Start time in ms from 00:00 CET / CEST time zone (see Daylight Saving Time, DST) |
-          | toT | Time | End time in ms from 00:00 CET / CEST time zone (see Daylight Saving Time, DST) |
-
-
-          Example:
-
-
-          ```
-          {
-          	"day": 2,
-          	"fromT": 63000000,
-          	"toT": 63300000
-          }
-          ```
-
-
-          **Possible values of** `day` **field:**
-
-
-
-          | name | value | description |
-          | --- | --- | --- |
-          |  | 1 | Monday |
-          |  | 2 | Tuesday |
-          |  | 3 | Wednesday |
-          |  | 4 | Thursday |
-          |  | 5 | Friday |
-          |  | 6 | Saturday |
-          |  | 7 | Sunday |
-
-
-          **Format of** `TRADING_RECORD`:
-
-
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | day | Number | Day of week |
-          | fromT | Time | Start time in ms from 00:00 CET / CEST time zone (see Daylight Saving Time, DST) |
-          | toT | Time | End time in ms from 00:00 CET / CEST time zone (see Daylight Saving Time, DST) |
-
-
-          Example:
-
-
-          ```
-          {
-          	"day": 2,
-          	"fromT": 63000000,
-          	"toT": 63300000
-          }
-          ```
-
-
-          **Possible values of** `day` **field:**
-
-
-
-          | name | value | description |
-          | --- | --- | --- |
-          |  | 1 | Monday |
-          |  | 2 | Tuesday |
-          |  | 3 | Wednesday |
-          |  | 4 | Thursday |
-          |  | 5 | Friday |
-          |  | 6 | Saturday |
-          |  | 7 | Sunday |
-
-      20. #### Command: **getVersion**
-
-
-          Description: Returns the current API version.
-
-
-          ##### Request:
-
-
-          Example:
-
-
-          ```
-          {
-          	"command": "getVersion"
-          }
-          ```
-
-
-
-          ##### Response:
-
-
-          Parameters:
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | version | String | current API version |
-
-
-          Example:
-
-
-          ```
-          {
-          	"status": true,
-          	"returnData": {
-          		"version": "2.4.15"
-          	}
-          }
-          ```
-
-      21. #### Command: **ping**
-
-
-          Description: Regularly calling this function is enough to refresh the internal state of all the components in the system. It is recommended that any application that does not execute other commands, should call this command at least once every 10 minutes. Please note that the streaming counterpart of this function is combination of [`ping `](http://developers.xstore.pro/documentation/#streamping) and [`getKeepAlive `](http://developers.xstore.pro/documentation/#streamgetKeepAlive).
-
-
-          ##### Request:
-
-
-          Example:
-
-
-          ```
-          {
-          	"command": "ping"
-          }
-          ```
-
-
-
-          ##### Response:
-
-
-          Example:
-
-
-          ```
-          {
-          	"status": true
-          }
-          ```
-
-      22. #### Command: **tradeTransaction**
-
-
-          Description: Starts trade transaction. tradeTransaction sends main transaction information to the server.
-
-
-
-
-          **How to verify that the trade request was accepted?**
-
-
-
-          The `status` field set to 'true' **does not** imply that the transaction was accepted. It only means, that the server acquired your request and began to process it. To analyse the status of the transaction (for example to verify if it was accepted or rejected) use the [`tradeTransactionStatus `](http://developers.xstore.pro/documentation/#tradeTransactionStatus) command with the `order` number, that came back with the response of the [`tradeTransaction `](http://developers.xstore.pro/documentation/#tradeTransaction) command. You can find the example here: [developers.xstore.pro/api/tutorials/opening\_and\_closing\_trades2](http://developers.xstore.pro/api/tutorials/opening_and_closing_trades2)
-
-
-
-
-
-
-          ##### Request:
-
-
-          Parameters:
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | tradeTransInfo | TRADE\_TRANS\_INFO | tradeTransInfo |
-
-
-          Example:
-
-
-          ```
-          {
-          	"command": "tradeTransaction",
-          	"arguments": {
-          		"tradeTransInfo": TRADE_TRANS_INFO
-          	}
-          }
-          ```
-
-
-          **Format of** `TRADE_TRANS_INFO`:
-
-
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | cmd | Number | Operation code |
-          | customComment | String | The value the customer may provide in order to retrieve it later. |
-          | expiration | Time | Pending order expiration time |
-          | offset | Number | Trailing offset |
-          | order | Number | 0 or position number for closing/modifications |
-          | price | Floating number | Trade price |
-          | sl | Floating number | Stop loss |
-          | symbol | String | Trade symbol |
-          | tp | Floating number | Take profit |
-          | type | Number | Trade transaction type |
-          | volume | Floating number | Trade volume |
-
-
-          Example:
-
-
-          ```
-          {
-          	"cmd": 2,
-          	"customComment": "Some text",
-          	"expiration": 1462006335000,
-          	"offset": 0,
-          	"order": 82188055,
-          	"price": 1.12,
-          	"sl": 0.0,
-          	"symbol": "EURUSD",
-          	"tp": 0.0,
-          	"type": 0,
-          	"volume": 5.0
-          }
-          ```
-
-
-          **Possible values of** `cmd` **field:**
-
-
-
-          | name | value | description |
-          | --- | --- | --- |
-          | BUY | 0 | buy |
-          | SELL | 1 | sell |
-          | BUY\_LIMIT | 2 | buy limit |
-          | SELL\_LIMIT | 3 | sell limit |
-          | BUY\_STOP | 4 | buy stop |
-          | SELL\_STOP | 5 | sell stop |
-          | BALANCE | 6 | Read only. Used in [`getTradesHistory `](http://developers.xstore.pro/documentation/#getTradesHistory) for manager's deposit/withdrawal operations (profit>0 for deposit, profit<0 for withdrawal). |
-          | CREDIT | 7 | Read only |
-
-
-          **Possible values of** `type` **field:**
-
-
-
-          | name | value | description |
-          | --- | --- | --- |
-          | OPEN | 0 | order open, used for opening orders |
-          | PENDING | 1 | order pending, only used in the streaming [`getTrades `](http://developers.xstore.pro/documentation/#streamgetTrades) command |
-          | CLOSE | 2 | order close |
-          | MODIFY | 3 | order modify, only used in the [`tradeTransaction `](http://developers.xstore.pro/documentation/#tradeTransaction) command |
-          | DELETE | 4 | order delete, only used in the [`tradeTransaction `](http://developers.xstore.pro/documentation/#tradeTransaction) command |
-
-
-
-          ##### Response:
-
-
-          Parameters:
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | order | Number | order |
-
-
-          Example:
-
-
-          ```
-          {
-          	"status": true,
-          	"returnData": {
-          		"order": 43
-          	}
-          }
-          ```
-
-      23. #### Command: **tradeTransactionStatus**
-
-
-          Description: **Please note that this function can be usually replaced by its streaming equivalent [`getTradeStatus `](http://developers.xstore.pro/documentation/#streamgetTradeStatus) which is the preferred way of retrieving transaction status data.** Returns current transaction status. At any time of transaction processing client might check the status of transaction on server side. In order to do that client must provide unique order taken from [`tradeTransaction `](http://developers.xstore.pro/documentation/#tradeTransaction) invocation.
-
-
-          ##### Request:
-
-
-          Parameters:
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | order | Number | order |
-
-
-          Example:
-
-
-          ```
-          {
-          	"command": "tradeTransactionStatus",
-          	"arguments": {
-          		"order": 43
-          	}
-          }
-          ```
-
-
-
-          ##### Response:
-
-
-          Parameters:
-
-
-
-          | name | type | description |
-          | --- | --- | --- |
-          | ask | Floating number | Price in base currency |
-          | bid | Floating number | Price in base currency |
-          | customComment | String | The value the customer may provide in order to retrieve it later. |
-          | message | String | Can be null |
-          | order | Number | Unique order number |
-          | requestStatus | Number | Request status code, described below |
-
-
-          Example:
-
-
-          ```
-          {
-          	"status": true,
-          	"returnData": {
-          		"ask": 1.392,
-          		"bid": 1.392,
-          		"customComment": "Some text",
-          		"message": null,
-          		"order": 43,
-          		"requestStatus": 3
-          	}
-          }
-          ```
-
-
-          **Possible values of** `requestStatus` **field:**
-
-
-
-          | name | value | description |
-          | --- | --- | --- |
-          | ERROR | 0 | error |
-          | PENDING | 1 | pending |
-          | ACCEPTED | 3 | The transaction has been executed successfully |
-          | REJECTED | 4 | The transaction has been rejected |
-
-6. ## Available streaming commands
+    ```
+    {
+    	"command": "login",
+    	"arguments": {
+    		"userId": "1000",
+    		"password": "PASSWORD",
+    		"appId": "test",
+    		"appName": "test"
+    	}
+    }
+
+    ```
+
+    After successful login the system responds with the `status` message that can contain the String representing `streamSessionId` field:
+
+    ```
+    {
+    	"status": true,
+    	"streamSessionId": "8469308861804289383"
+    }
+
+    ```
+
+    The `streamSessionId` field of the string type, if present, is a token that can be used to establish a streaming subscription on a separate network connection. `streamSessionId` is used in streaming subscription commands.
+
+    `streamSessionId` is unique for the given main session and will change between login sessions.
+
+2.  ### Logout
+
+    Format of input:
+
+    ```
+    {
+    	"command": "logout"
+    }
+    ```
+
+    No `returnData` field in output. Only `status` message is sent.
+
+3.  ### Retrieving trading data
+
+    1.  #### Command: **getAllSymbols**
+
+        Description: Returns array of all symbols available for the user.
+
+        ##### Request:
+
+        Example:
+
+        ```
+        {
+        	"command": "getAllSymbols"
+        }
+        ```
+
+        ##### Response:
+
+        Parameters:
+
+        | name | type  | description                                                                            |
+        | ---- | ----- | -------------------------------------------------------------------------------------- |
+        |      | array | Array of [`SYMBOL_RECORD `](http://developers.xstore.pro/documentation/#SYMBOL_RECORD) |
+
+        Example:
+
+        ```
+        {
+        	"status": true,
+        	"returnData": [SYMBOL_RECORD, SYMBOL_RECORD, ...]
+        }
+        ```
+
+        **Format of** `SYMBOL_RECORD`:
+
+        Please be advised that result values for profit and margin calculation can be used optionally, because server is able to perform all profit/margin calculations for Client application by commands described later in this document.
+
+        | name               | type            | description                                                                                                                |
+        | ------------------ | --------------- | -------------------------------------------------------------------------------------------------------------------------- |
+        | ask                | Floating number | Ask price in base currency                                                                                                 |
+        | bid                | Floating number | Bid price in base currency                                                                                                 |
+        | categoryName       | String          | Category name                                                                                                              |
+        | contractSize       | Number          | Size of 1 lot                                                                                                              |
+        | currency           | String          | Currency                                                                                                                   |
+        | currencyPair       | Boolean         | Indicates whether the symbol represents a currency pair                                                                    |
+        | currencyProfit     | String          | The currency of calculated profit                                                                                          |
+        | description        | String          | Description                                                                                                                |
+        | expiration         | Time            | Null if not applicable                                                                                                     |
+        | groupName          | String          | Symbol group name                                                                                                          |
+        | high               | Floating number | The highest price of the day in base currency                                                                              |
+        | initialMargin      | Number          | Initial margin for 1 lot order, used for profit/margin calculation                                                         |
+        | instantMaxVolume   | Number          | Maximum instant volume multiplied by 100 (in lots)                                                                         |
+        | leverage           | Floating number | Symbol leverage                                                                                                            |
+        | longOnly           | Boolean         | Long only                                                                                                                  |
+        | lotMax             | Floating number | Maximum size of trade                                                                                                      |
+        | lotMin             | Floating number | Minimum size of trade                                                                                                      |
+        | lotStep            | Floating number | A value of minimum step by which the size of trade can be changed (within `lotMin` \- `lotMax` range)                      |
+        | low                | Floating number | The lowest price of the day in base currency                                                                               |
+        | marginHedged       | Number          | Used for profit calculation                                                                                                |
+        | marginHedgedStrong | Boolean         | For margin calculation                                                                                                     |
+        | marginMaintenance  | Number          | For margin calculation, null if not applicable                                                                             |
+        | marginMode         | Number          | For margin calculation                                                                                                     |
+        | percentage         | Floating number | Percentage                                                                                                                 |
+        | pipsPrecision      | Number          | Number of symbol's pip decimal places                                                                                      |
+        | precision          | Number          | Number of symbol's price decimal places                                                                                    |
+        | profitMode         | Number          | For profit calculation                                                                                                     |
+        | quoteId            | Number          | Source of price                                                                                                            |
+        | shortSelling       | Boolean         | Indicates whether short selling is allowed on the instrument                                                               |
+        | spreadRaw          | Floating number | The difference between raw ask and bid prices                                                                              |
+        | spreadTable        | Floating number | Spread representation                                                                                                      |
+        | starting           | Time            | Null if not applicable                                                                                                     |
+        | stepRuleId         | Number          | Appropriate step rule ID from [`getStepRules `](http://developers.xstore.pro/documentation/#getStepRules) command response |
+        | stopsLevel         | Number          | Minimal distance (in pips) from the current price where the stopLoss/takeProfit can be set                                 |
+        | swap_rollover3days | Number          | Time when additional swap is accounted for weekend                                                                         |
+        | swapEnable         | Boolean         | Indicates whether swap value is added to position on end of day                                                            |
+        | swapLong           | Floating number | Swap value for long positions in pips                                                                                      |
+        | swapShort          | Floating number | Swap value for short positions in pips                                                                                     |
+        | swapType           | Number          | Type of swap calculated                                                                                                    |
+        | symbol             | String          | Symbol name                                                                                                                |
+        | tickSize           | Floating number | Smallest possible price change, used for profit/margin calculation, null if not applicable                                 |
+        | tickValue          | Floating number | Value of smallest possible price change (in base currency), used for profit/margin calculation, null if not applicable     |
+        | time               | Time            | Ask & bid tick time                                                                                                        |
+        | timeString         | String          | Time in String                                                                                                             |
+        | trailingEnabled    | Boolean         | Indicates whether trailing stop (offset) is applicable to the instrument.                                                  |
+        | type               | Number          | Instrument class number                                                                                                    |
+
+        Example:
+
+        ```
+        {
+        	"ask": 4000.0,
+        	"bid": 4000.0,
+        	"categoryName": "Forex",
+        	"contractSize": 100000,
+        	"currency": "USD",
+        	"currencyPair": true,
+        	"currencyProfit": "SEK",
+        	"description": "USD/PLN",
+        	"expiration": null,
+        	"groupName": "Minor",
+        	"high": 4000.0,
+        	"initialMargin": 0,
+        	"instantMaxVolume": 0,
+        	"leverage": 1.5,
+        	"longOnly": false,
+        	"lotMax": 10.0,
+        	"lotMin": 0.1,
+        	"lotStep": 0.1,
+        	"low": 3500.0,
+        	"marginHedged": 0,
+        	"marginHedgedStrong": false,
+        	"marginMaintenance": null,
+        	"marginMode": 101,
+        	"percentage": 100.0,
+        	"precision": 2,
+        	"profitMode": 5,
+        	"quoteId": 1,
+        	"shortSelling": true,
+        	"spreadRaw": 0.000003,
+        	"spreadTable": 0.00042,
+        	"starting": null,
+        	"stepRuleId": 1,
+        	"stopsLevel": 0,
+        	"swap_rollover3days": 0,
+        	"swapEnable": true,
+        	"swapLong": -2.55929,
+        	"swapShort": 0.131,
+        	"swapType": 0,
+        	"symbol": "USDPLN",
+        	"tickSize": 1.0,
+        	"tickValue": 1.0,
+        	"time": 1272446136891,
+        	"timeString": "Thu May 23 12:23:44 EDT 2013",
+        	"trailingEnabled": true,
+        	"type": 21
+        }
+        ```
+
+        **Possible values of** `quoteId` **field:**
+
+        | name  | value | description |
+        | ----- | ----- | ----------- |
+        | fixed | 1     | fixed       |
+        | float | 2     | float       |
+        | depth | 3     | depth       |
+        | cross | 4     | cross       |
+
+        **Possible values of** `marginMode` **field:**
+
+        | name          | value | description   |
+        | ------------- | ----- | ------------- |
+        | Forex         | 101   | Forex         |
+        | CFD leveraged | 102   | CFD leveraged |
+        | CFD           | 103   | CFD           |
+
+        **Possible values of** `profitMode` **field:**
+
+        | name  | value | description |
+        | ----- | ----- | ----------- |
+        | FOREX | 5     | FOREX       |
+        | CFD   | 6     | CFD         |
+
+    2.  #### Command: **getCalendar**
+
+        Description: Returns calendar with market events.
+
+        ##### Request:
+
+        Example:
+
+        ```
+        {
+        	"command": "getCalendar"
+        }
+        ```
+
+        ##### Response:
+
+        Parameters:
+
+        | name | type  | description                                                                                |
+        | ---- | ----- | ------------------------------------------------------------------------------------------ |
+        |      | array | Array of [`CALENDAR_RECORD `](http://developers.xstore.pro/documentation/#CALENDAR_RECORD) |
+
+        Example:
+
+        ```
+        {
+        	"status": true,
+        	"returnData": [CALENDAR_RECORD, CALENDAR_RECORD, ...]
+        }
+        ```
+
+        **Format of** `CALENDAR_RECORD`:
+
+        | name     | type   | description                                                                                                                  |
+        | -------- | ------ | ---------------------------------------------------------------------------------------------------------------------------- |
+        | country  | String | Two letter country code                                                                                                      |
+        | current  | String | Market value (current), empty before time of release of this value (time from "time" record)                                 |
+        | forecast | String | Forecasted value                                                                                                             |
+        | impact   | String | Impact on market                                                                                                             |
+        | period   | String | Information period                                                                                                           |
+        | previous | String | Value from previous information release                                                                                      |
+        | time     | Time   | Time, when the information will be released (in this time empty "current" value should be changed with exact released value) |
+        | title    | String | Name of the indicator for which values will be released                                                                      |
+
+        Example:
+
+        ```
+        {
+        	"country": "CA",
+        	"current": "",
+        	"forecast": "",
+        	"impact": "3",
+        	"period": "(FEB)",
+        	"previous": "58.3",
+        	"time": 1374846900000,
+        	"title": "Ivey Purchasing Managers Index"
+        }
+        ```
+
+        **Possible values of** `impact` **field:**
+
+        | name   | value | description |
+        | ------ | ----- | ----------- |
+        | low    | 1     | low         |
+        | medium | 2     | medium      |
+        | high   | 3     | high        |
+
+    3.  #### Command: **getChartLastRequest**
+
+        Description: **Please note that this function can be usually replaced by its streaming equivalent [`getCandles `](http://developers.xstore.pro/documentation/#streamgetCandles) which is the preferred way of retrieving current candle data.** Returns chart info, from start date to the current time. If the chosen period of [`CHART_LAST_INFO_RECORD `](http://developers.xstore.pro/documentation/#CHART_LAST_INFO_RECORD) is greater than 1 minute, the last candle returned by the API can change until the end of the period (the candle is being automatically updated every minute).
+
+        Limitations: there are limitations in charts data availability. Detailed ranges for charts data, what can be accessed with specific period, are as follows:
+
+        PERIOD_M1 --- <0-1) month, i.e. one month time
+
+        PERIOD_M30 --- <1-7) month, six months time
+
+        PERIOD_H4 --- <7-13) month, six months time
+
+        PERIOD_D1 --- 13 month, and earlier on
+
+        Note, that specific PERIOD\_ is the lowest (i.e. the most detailed) period, accessible in listed range. For instance, in months range <1-7) you can access periods: PERIOD_M30, PERIOD_H1, PERIOD_H4, PERIOD_D1, PERIOD_W1, PERIOD_MN1. Specific data ranges availability is guaranteed, however those ranges may be wider, e.g.: PERIOD_M1 may be accessible for 1.5 months back from now, where 1.0 months is guaranteed.
+
+        Example scenario:
+
+        - request charts of 5 minutes period, for 3 months time span, back from now;
+        - response: you are guaranteed to get 1 month of 5 minutes charts; because, 5 minutes period charts are not accessible 2 months and 3 months back from now.
+
+        ##### Request:
+
+        Parameters:
+
+        | name | type                   | description |
+        | ---- | ---------------------- | ----------- |
+        | info | CHART_LAST_INFO_RECORD | info        |
+
+        Example:
+
+        ```
+        {
+        	"command": "getChartLastRequest",
+        	"arguments": {
+        		"info": CHART_LAST_INFO_RECORD
+        	}
+        }
+        ```
+
+        **Format of** `CHART_LAST_INFO_RECORD`:
+
+        | name   | type   | description                                                               |
+        | ------ | ------ | ------------------------------------------------------------------------- |
+        | period | Number | Period code                                                               |
+        | start  | Time   | Start of chart block (rounded down to the nearest interval and excluding) |
+        | symbol | String | Symbol                                                                    |
+
+        Example:
+
+        ```
+        {
+        	"period": 5,
+        	"start": 1262944112000,
+        	"symbol": "PKN.PL"
+        }
+        ```
+
+        **Possible values of** `period` **field:**
+
+        | name       | value | description             |
+        | ---------- | ----- | ----------------------- |
+        | PERIOD_M1  | 1     | 1 minute                |
+        | PERIOD_M5  | 5     | 5 minutes               |
+        | PERIOD_M15 | 15    | 15 minutes              |
+        | PERIOD_M30 | 30    | 30 minutes              |
+        | PERIOD_H1  | 60    | 60 minutes (1 hour)     |
+        | PERIOD_H4  | 240   | 240 minutes (4 hours)   |
+        | PERIOD_D1  | 1440  | 1440 minutes (1 day)    |
+        | PERIOD_W1  | 10080 | 10080 minutes (1 week)  |
+        | PERIOD_MN1 | 43200 | 43200 minutes (30 days) |
+
+        ##### Response:
+
+        Parameters:
+
+        | name      | type   | description                                                                                  |
+        | --------- | ------ | -------------------------------------------------------------------------------------------- |
+        | digits    | Number | Number of decimal places                                                                     |
+        | rateInfos | array  | Array of [`RATE_INFO_RECORD `](http://developers.xstore.pro/documentation/#RATE_INFO_RECORD) |
+
+        Example:
+
+        ```
+        {
+        	"status": true,
+        	"returnData": {
+        		"digits": 4,
+        		"rateInfos": [RATE_INFO_RECORD, RATE_INFO_RECORD, ...]
+        	}
+        }
+        ```
+
+        **Format of** `RATE_INFO_RECORD`:
+
+        Price values must be divided by 10 to the power of digits in order to obtain exact prices.
+
+        | name      | type            | description                                                               |
+        | --------- | --------------- | ------------------------------------------------------------------------- |
+        | close     | Floating number | Value of close price (shift from open price)                              |
+        | ctm       | Time            | Candle start time in CET / CEST time zone (see Daylight Saving Time, DST) |
+        | ctmString | String          | String representation of the 'ctm' field                                  |
+        | high      | Floating number | Highest value in the given period (shift from open price)                 |
+        | low       | Floating number | Lowest value in the given period (shift from open price)                  |
+        | open      | Floating number | Open price (in base currency \* 10 to the power of digits)                |
+        | vol       | Floating number | Volume in lots                                                            |
+
+        Example:
+
+        ```
+        {
+        	"close": 1.0,
+        	"ctm": 1389362640000,
+        	"ctmString": "Jan 10, 2014 3:04:00 PM",
+        	"high": 6.0,
+        	"low": 0.0,
+        	"open": 41848.0,
+        	"vol": 0.0
+        }
+        ```
+
+    4.  #### Command: **getChartRangeRequest**
+
+            Description: **Please note that this function can be usually replaced by its streaming equivalent [`getCandles `](http://developers.xstore.pro/documentation/#streamgetCandles) which is the preferred way of retrieving current candle data.** Returns chart info with data between given start and end dates.
+
+            Limitations: there are limitations in charts data availability. Detailed ranges for charts data, what can be accessed with specific period, are as follows:
+
+            PERIOD\_M1 --- <0-1) month, i.e. one month time
+
+             PERIOD\_M30 --- <1-7) month, six months time
+
+             PERIOD\_H4 --- <7-13) month, six months time
+
+             PERIOD\_D1 --- 13 month, and earlier on
+
+            Note, that specific PERIOD\_ is the lowest (i.e. the most detailed) period, accessible in listed range. For instance, in months range <1-7) you can access periods: PERIOD\_M30, PERIOD\_H1, PERIOD\_H4, PERIOD\_D1, PERIOD\_W1, PERIOD\_MN1. Specific data ranges availability is guaranteed, however those ranges may be wider, e.g.: PERIOD\_M1 may be accessible for 1.5 months back from now, where 1.0 months is guaranteed.
+
+            ##### Request:
+
+            Parameters:
+
+            | name | type | description |
+            | --- | --- | --- |
+            | info | CHART\_RANGE\_INFO\_RECORD | info |
+
+            Example:
+
+            ```
+            {
+            	"command": "getChartRangeRequest",
+            	"arguments": {
+            		"info": CHART_RANGE_INFO_RECORD
+            	}
+            }
+            ```
+
+            **Format of** `CHART_RANGE_INFO_RECORD`:
+
+            Ticks field - if ticks is not set or value is 0, [`getChartRangeRequest `](http://developers.xstore.pro/documentation/#getChartRangeRequest) works as before (you must send valid `start` and `end` time fields).
+
+             If ticks value is not equal to 0, field `end` is ignored.
+
+             If ticks >0 (e.g. N) then API returns N candles from time start.
+
+             If ticks <0 then API returns N candles to time start.
+
+             It is possible for API to return fewer chart candles than set in tick field.
+
+            | name | type | description |
+            | --- | --- | --- |
+            | end | Time | End of chart block (rounded down to the nearest interval and excluding) |
+            | period | Number | Period code |
+            | start | Time | Start of chart block (rounded down to the nearest interval and excluding) |
+            | symbol | String | Symbol |
+            | ticks | Number | Number of ticks needed, this field is optional, please read the description above |
+
+            Example:
+
+            ```
+            {
+            	"end": 1262944412000,
+            	"period": 5,
+            	"start": 1262944112000,
+            	"symbol": "PKN.PL",
+            	"ticks": 0
+            }
+            ```
+
+            **Possible values of** `period` **field:**
+
+            | name | value | description |
+            | --- | --- | --- |
+            | PERIOD\_M1 | 1 | 1 minute |
+            | PERIOD\_M5 | 5 | 5 minutes |
+            | PERIOD\_M15 | 15 | 15 minutes |
+            | PERIOD\_M30 | 30 | 30 minutes |
+            | PERIOD\_H1 | 60 | 60 minutes (1 hour) |
+            | PERIOD\_H4 | 240 | 240 minutes (4 hours) |
+            | PERIOD\_D1 | 1440 | 1440 minutes (1 day) |
+            | PERIOD\_W1 | 10080 | 10080 minutes (1 week) |
+            | rateInfos | array | Array of [`RATE_INFO_RECORD `](http://developers.xstore.pro/documentation/#RATE_INFO_RECORD) |
+
+
+            Example:
+
+
+            ```
+            {
+            	"status": true,
+            	"returnData": {
+            		"digits": 4,
+            		"rateInfos": [RATE_INFO_RECORD, RATE_INFO_RECORD, ...]
+            	}
+            }
+            ```
+
+
+            **Format of** `RATE_INFO_RECORD`:
+
+
+
+            Price values must be divided by 10 to the power of digits in order to obtain exact prices.
+
+
+
+
+
+            | name | type | description |
+            | --- | --- | --- |
+            | close | Floating number | Value of close price (shift from open price) |
+            | ctm | Time | Candle start time in CET / CEST time zone (see Daylight Saving Time, DST) |
+            | ctmString | String | String representation of the 'ctm' field |
+            | high | Floating number | Highest value in the given period (shift from open price) |
+            | low | Floating number | Lowest value in the given period (shift from open price) |
+            | open | Floating number | Open price (in base currency \* 10 to the power of digits) |
+            | vol | Floating number | Volume in lots |
+
+
+            Example:
+
+
+            ```
+            {
+            	"close": 1.0,
+            	"ctm": 1389362640000,
+            	"ctmString": "Jan 10, 2014 3:04:00 PM",
+            	"high": 6.0,
+            	"low": 0.0,
+            	"open": 41848.0,
+            	"vol": 0.0
+            }
+            ```
+
+        5. #### Command: **getCommissionDef**
+
+           Description: Returns calculation of commission and rate of exchange. The value is calculated as expected value, and therefore might not be perfectly accurate.
+
+           ##### Request:
+
+           Parameters:
+
+           | name   | type            | description |
+           | ------ | --------------- | ----------- |
+           | symbol | String          | symbol      |
+           | volume | Floating number | volume      |
+
+           Example:
+
+           ```
+           {
+           	"command": "getCommissionDef",
+           	"arguments": {
+           		"symbol": "T.US",
+           		"volume": 1.0
+           	}
+           }
+           ```
+
+           ##### Response:
+
+           Parameters:
+
+           | name           | type            | description                                                                                             |
+           | -------------- | --------------- | ------------------------------------------------------------------------------------------------------- |
+           | commission     | Floating number | calculated commission in account currency, could be null if not applicable                              |
+           | rateOfExchange | Floating number | rate of exchange between account currency and instrument base currency, could be null if not applicable |
+
+           Example:
+
+           ```
+           {
+           	"status": true,
+           	"returnData": {
+           		"commission": 0.51,
+           		"rateOfExchange": 0.1609
+           	}
+           }
+           ```
+
+        6. #### Command: **getCurrentUserData**
+
+           Description: Returns information about account currency, and account leverage.
+
+           ##### Request:
+
+           Example:
+
+           ```
+           {
+           	"command": "getCurrentUserData"
+           }
+           ```
+
+           ##### Response:
+
+           Parameters:
+
+           | name               | type            | description                                                                                                            |
+           | ------------------ | --------------- | ---------------------------------------------------------------------------------------------------------------------- |
+           | companyUnit        | Number          | Unit the account is assigned to.                                                                                       |
+           | currency           | String          | account currency                                                                                                       |
+           | group              | String          | group                                                                                                                  |
+           | ibAccount          | Boolean         | Indicates whether this account is an IB account.                                                                       |
+           | leverage           | Number          | This field should not be used. It is inactive and its value is always 1.                                               |
+           | leverageMultiplier | Floating number | The factor used for margin calculations. The actual value of leverage can be calculated by dividing this value by 100. |
+           | spreadType         | String          | spreadType, null if not applicable                                                                                     |
+           | trailingStop       | Boolean         | Indicates whether this account is enabled to use trailing stop.                                                        |
+
+           Example:
+
+           ```
+           {
+           	"status": true,
+           	"returnData": {
+           		"companyUnit": 8,
+           		"currency": "PLN",
+           		"group": "demoPLeurSTANDARD200",
+           		"ibAccount": false,
+           		"leverage": 1,
+           		"leverageMultiplier": 0.25,
+           		"spreadType": "FLOAT",
+           		"trailingStop": false
+           	}
+           }
+           ```
+
+        7. #### Command: **getIbsHistory**
+
+           Description: Returns IBs data from the given time range.
+
+           ##### Request:
+
+           Parameters:
+
+           | name  | type | description                |
+           | ----- | ---- | -------------------------- |
+           | end   | Time | End of IBs history block   |
+           | start | Time | Start of IBs history block |
+
+           Example:
+
+           ```
+           {
+           	"command": "getIbsHistory",
+           	"arguments": {
+           		"end": 1395053810991,
+           		"start": 1394449010991
+           	}
+           }
+           ```
+
+           ##### Response:
+
+           Parameters:
+
+           | name | type  | description                                                                    |
+           | ---- | ----- | ------------------------------------------------------------------------------ |
+           |      | array | Array of [`IB_RECORD `](http://developers.xstore.pro/documentation/#IB_RECORD) |
+
+           Example:
+
+           ```
+           {
+           	"status": true,
+           	"returnData": [IB_RECORD, IB_RECORD, ...]
+           }
+           ```
+
+           **Format of** `IB_RECORD`:
+
+           | name       | type            | description                                                |
+           | ---------- | --------------- | ---------------------------------------------------------- |
+           | closePrice | Floating number | IB close price or null if not allowed to view              |
+           | login      | String          | IB user login or null if not allowed to view               |
+           | nominal    | Floating number | IB nominal or null if not allowed to view                  |
+           | openPrice  | Floating number | IB open price or null if not allowed to view               |
+           | side       | Number          | Operation code or null if not allowed to view              |
+           | surname    | String          | IB user surname or null if not allowed to view             |
+           | symbol     | String          | Symbol or null if not allowed to view                      |
+           | timestamp  | Time            | Time the record was created or null if not allowed to view |
+           | volume     | Floating number | Volume in lots or null if not allowed to view              |
+
+           Example:
+
+           ```
+           {
+           	"closePrice": 1.39302,
+           	"login": "12345",
+           	"nominal": 6.00,
+           	"openPrice": 1.39376,
+           	"side": 0,
+           	"surname": "IB_Client_1",
+           	"symbol": "EURUSD",
+           	"timestamp": 1395755870000,
+           	"volume": 1.0
+           }
+           ```
+
+           **Possible values of** `side` **field:**
+
+           | name | value | description |
+           | ---- | ----- | ----------- |
+           | BUY  | 0     | buy         |
+           | SELL | 1     | sell        |
+
+        8. #### Command: **getMarginLevel**
+
+           Description: **Please note that this function can be usually replaced by its streaming equivalent [`getBalance `](http://developers.xstore.pro/documentation/#streamgetBalance) which is the preferred way of retrieving account indicators.** Returns various account indicators.
+
+           ##### Request:
+
+           Example:
+
+           ```
+           {
+           	"command": "getMarginLevel"
+           }
+           ```
+
+           ##### Response:
+
+           Parameters:
+
+           | name         | type            | description                                        |
+           | ------------ | --------------- | -------------------------------------------------- |
+           | balance      | Floating number | balance in account currency                        |
+           | credit       | Floating number | credit                                             |
+           | currency     | String          | user currency                                      |
+           | equity       | Floating number | sum of balance and all profits in account currency |
+           | margin       | Floating number | margin requirements in account currency            |
+           | margin_free  | Floating number | free margin in account currency                    |
+           | margin_level | Floating number | margin level percentage                            |
+
+           Example:
+
+           ```
+           {
+           	"status": true,
+           	"returnData": {
+           		"balance": 995800269.43,
+           		"credit": 1000.00,
+           		"currency": "PLN",
+           		"equity": 995985397.56,
+           		"margin": 572634.43,
+           		"margin_free": 995227635.00,
+           		"margin_level": 173930.41
+           	}
+           }
+           ```
+
+        9. #### Command: **getMarginTrade**
+
+           Description: Returns expected margin for given instrument and volume. The value is calculated as expected margin value, and therefore might not be perfectly accurate.
+
+           ##### Request:
+
+           Parameters:
+
+           | name   | type            | description |
+           | ------ | --------------- | ----------- |
+           | symbol | String          | symbol      |
+           | volume | Floating number | volume      |
+
+           Example:
+
+           ```
+           {
+           	"command": "getMarginTrade",
+           	"arguments": {
+           		"symbol": "EURPLN",
+           		"volume": 1.0
+           	}
+           }
+           ```
+
+           ##### Response:
+
+           Parameters:
+
+           | name   | type            | description                           |
+           | ------ | --------------- | ------------------------------------- |
+           | margin | Floating number | calculated margin in account currency |
+
+           Example:
+
+           ```
+           {
+           	"status": true,
+           	"returnData": {
+           		"margin": 4399.350
+           	}
+           }
+           ```
+
+        10. #### Command: **getNews**
+
+            Description: **Please note that this function can be usually replaced by its streaming equivalent [`getNews `](http://developers.xstore.pro/documentation/#streamgetNews) which is the preferred way of retrieving news data.** Returns news from trading server which were sent within specified period of time.
+
+            ##### Request:
+
+            Parameters:
+
+            | name  | type | description                               |
+            | ----- | ---- | ----------------------------------------- |
+            | end   | Time | Time, 0 means current time for simplicity |
+            | start | Time | Time                                      |
+
+            Example:
+
+            ```
+            {
+            	"command": "getNews",
+            	"arguments": {
+            		"end": 0,
+            		"start": 1275993488000
+            	}
+            }
+            ```
+
+            ##### Response:
+
+            Parameters:
+
+            | name | type  | description                                                                                    |
+            | ---- | ----- | ---------------------------------------------------------------------------------------------- |
+            |      | array | Array of [`NEWS_TOPIC_RECORD `](http://developers.xstore.pro/documentation/#NEWS_TOPIC_RECORD) |
+
+            Example:
+
+            ```
+            {
+            	"status": true,
+            	"returnData": [NEWS_TOPIC_RECORD, NEWS_TOPIC_RECORD, ...]
+            }
+            ```
+
+            **Format of** `NEWS_TOPIC_RECORD`:
+
+            | name       | type   | description |
+            | ---------- | ------ | ----------- |
+            | body       | String | Body        |
+            | bodylen    | Number | Body length |
+            | key        | String | News key    |
+            | time       | Time   | Time        |
+            | timeString | String | Time string |
+            | title      | String | News title  |
+
+            Example:
+
+            ```
+            {
+            	"body": "<html>...</html>",
+            	"bodylen": 110,
+            	"key": "1f6da766abd29927aa854823f0105c23",
+            	"time": 1262944112000,
+            	"timeString": "May 17, 2013 4:30:00 PM",
+            	"title": "Breaking trend"
+            }
+            ```
+
+        11. #### Command: **getProfitCalculation**
+
+            Description: Calculates estimated profit for given deal data Should be used for calculator-like apps only. Profit for opened transactions should be taken from server, due to higher precision of server calculation.
+
+            ##### Request:
+
+            Parameters:
+
+            | name       | type            | description                      |
+            | ---------- | --------------- | -------------------------------- |
+            | closePrice | Floating number | theoretical close price of order |
+            | cmd        | Number          | Operation code                   |
+            | openPrice  | Floating number | theoretical open price of order  |
+            | symbol     | String          | symbol                           |
+            | volume     | Floating number | volume                           |
+
+            Example:
+
+            ```
+            {
+            	"command": "getProfitCalculation",
+            	"arguments": {
+            		"closePrice": 1.3000,
+            		"cmd": 0,
+            		"openPrice": 1.2233,
+            		"symbol": "EURPLN",
+            		"volume": 1.0
+            	}
+            }
+            ```
+
+            **Possible values of** `cmd` **field:**
+
+            | name       | value | description                                                                                                                                                                                         |
+            | ---------- | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+            | BUY        | 0     | buy                                                                                                                                                                                                 |
+            | SELL       | 1     | sell                                                                                                                                                                                                |
+            | BUY_LIMIT  | 2     | buy limit                                                                                                                                                                                           |
+            | SELL_LIMIT | 3     | sell limit                                                                                                                                                                                          |
+            | BUY_STOP   | 4     | buy stop                                                                                                                                                                                            |
+            | SELL_STOP  | 5     | sell stop                                                                                                                                                                                           |
+            | BALANCE    | 6     | Read only. Used in [`getTradesHistory `](http://developers.xstore.pro/documentation/#getTradesHistory) for manager's deposit/withdrawal operations (profit>0 for deposit, profit<0 for withdrawal). |
+            | CREDIT     | 7     | Read only                                                                                                                                                                                           |
+
+            ##### Response:
+
+            Parameters:
+
+            | name   | type            | description                |
+            | ------ | --------------- | -------------------------- |
+            | profit | Floating number | Profit in account currency |
+
+            Example:
+
+            ```
+            {
+            	"status": true,
+            	"returnData": {
+            		"profit": 714.303
+            	}
+            }
+            ```
+
+        12. #### Command: **getServerTime**
+
+            Description: Returns current time on trading server.
+
+            ##### Request:
+
+            Example:
+
+            ```
+            {
+            	"command": "getServerTime"
+            }
+            ```
+
+            ##### Response:
+
+            Parameters:
+
+            | name       | type   | description                                                 |
+            | ---------- | ------ | ----------------------------------------------------------- |
+            | time       | Time   | Time                                                        |
+            | timeString | String | Time described in form set on server (local time of server) |
+
+            Example:
+
+            ```
+            {
+            	"status": true,
+            	"returnData": {
+            		"time": 1392211379731,
+            		"timeString": "Feb 12, 2014 2:22:59 PM"
+            	}
+            }
+            ```
+
+        13. #### Command: **getStepRules**
+
+            Description: Returns a list of step rules for DMAs.
+
+            ##### Request:
+
+            Example:
+
+            ```
+            {
+            	"command": "getStepRules"
+            }
+            ```
+
+            ##### Response:
+
+            Parameters:
+
+            | name | type  | description                                                                                  |
+            | ---- | ----- | -------------------------------------------------------------------------------------------- |
+            |      | array | Array of [`STEP_RULE_RECORD `](http://developers.xstore.pro/documentation/#STEP_RULE_RECORD) |
+
+            Example:
+
+            ```
+            {
+            	"status": true,
+            	"returnData": [STEP_RULE_RECORD, STEP_RULE_RECORD, ...]
+            }
+            ```
+
+            **Format of** `STEP_RULE_RECORD`:
+
+            | name  | type   | description                                                                        |
+            | ----- | ------ | ---------------------------------------------------------------------------------- |
+            | id    | Number | Step rule ID                                                                       |
+            | name  | String | Step rule name                                                                     |
+            | steps | array  | Array of [`STEP_RECORD `](http://developers.xstore.pro/documentation/#STEP_RECORD) |
+
+            Example:
+
+            ```
+            {
+            	"id": 1,
+            	"name": "Forex",
+            	"steps": [STEP_RECORD, STEP_RECORD, ...]
+            }
+            ```
+
+            **Format of** `STEP_RECORD`:
+
+            | name      | type            | description                             |
+            | --------- | --------------- | --------------------------------------- |
+            | fromValue | Floating number | Lower border of the volume range        |
+            | step      | Floating number | lotStep value in the given volume range |
+
+            Example:
+
+            ```
+            {
+            	"fromValue": 0.1,
+            	"step": 0.0025
+            }
+            ```
+
+        14. #### Command: **getSymbol**
+
+            Description: Returns information about symbol available for the user.
+
+            ##### Request:
+
+            Parameters:
+
+            | name   | type   | description |
+            | ------ | ------ | ----------- |
+            | symbol | String | symbol      |
+
+            Example:
+
+            ```
+            {
+            	"command": "getSymbol",
+            	"arguments": {
+            		"symbol": "EURPLN"
+            	}
+            }
+            ```
+
+            ##### Response:
+
+            Parameters:
+
+            | name | type          | description                                                                   |
+            | ---- | ------------- | ----------------------------------------------------------------------------- |
+            |      | SYMBOL_RECORD | [`SYMBOL_RECORD `](http://developers.xstore.pro/documentation/#SYMBOL_RECORD) |
+
+            Example:
+
+            ```
+            {
+            	"status": true,
+            	"returnData": SYMBOL_RECORD
+            }
+            ```
+
+            **Format of** `SYMBOL_RECORD`:
+
+            Please be advised that result values for profit and margin calculation can be used optionally, because server is able to perform all profit/margin calculations for Client application by commands described later in this document.
+
+            | name               | type            | description                                                                                                                |
+            | ------------------ | --------------- | -------------------------------------------------------------------------------------------------------------------------- |
+            | ask                | Floating number | Ask price in base currency                                                                                                 |
+            | bid                | Floating number | Bid price in base currency                                                                                                 |
+            | categoryName       | String          | Category name                                                                                                              |
+            | contractSize       | Number          | Size of 1 lot                                                                                                              |
+            | currency           | String          | Currency                                                                                                                   |
+            | currencyPair       | Boolean         | Indicates whether the symbol represents a currency pair                                                                    |
+            | currencyProfit     | String          | The currency of calculated profit                                                                                          |
+            | description        | String          | Description                                                                                                                |
+            | expiration         | Time            | Null if not applicable                                                                                                     |
+            | groupName          | String          | Symbol group name                                                                                                          |
+            | high               | Floating number | The highest price of the day in base currency                                                                              |
+            | initialMargin      | Number          | Initial margin for 1 lot order, used for profit/margin calculation                                                         |
+            | instantMaxVolume   | Number          | Maximum instant volume multiplied by 100 (in lots)                                                                         |
+            | leverage           | Floating number | Symbol leverage                                                                                                            |
+            | longOnly           | Boolean         | Long only                                                                                                                  |
+            | lotMax             | Floating number | Maximum size of trade                                                                                                      |
+            | lotMin             | Floating number | Minimum size of trade                                                                                                      |
+            | lotStep            | Floating number | A value of minimum step by which the size of trade can be changed (within `lotMin` \- `lotMax` range)                      |
+            | low                | Floating number | The lowest price of the day in base currency                                                                               |
+            | marginHedged       | Number          | Used for profit calculation                                                                                                |
+            | marginHedgedStrong | Boolean         | For margin calculation                                                                                                     |
+            | marginMaintenance  | Number          | For margin calculation, null if not applicable                                                                             |
+            | marginMode         | Number          | For margin calculation                                                                                                     |
+            | percentage         | Floating number | Percentage                                                                                                                 |
+            | pipsPrecision      | Number          | Number of symbol's pip decimal places                                                                                      |
+            | precision          | Number          | Number of symbol's price decimal places                                                                                    |
+            | profitMode         | Number          | For profit calculation                                                                                                     |
+            | quoteId            | Number          | Source of price                                                                                                            |
+            | shortSelling       | Boolean         | Indicates whether short selling is allowed on the instrument                                                               |
+            | spreadRaw          | Floating number | The difference between raw ask and bid prices                                                                              |
+            | spreadTable        | Floating number | Spread representation                                                                                                      |
+            | starting           | Time            | Null if not applicable                                                                                                     |
+            | stepRuleId         | Number          | Appropriate step rule ID from [`getStepRules `](http://developers.xstore.pro/documentation/#getStepRules) command response |
+            | stopsLevel         | Number          | Minimal distance (in pips) from the current price where the stopLoss/takeProfit can be set                                 |
+            | swap_rollover3days | Number          | Time when additional swap is accounted for weekend                                                                         |
+            | swapEnable         | Boolean         | Indicates whether swap value is added to position on end of day                                                            |
+            | swapLong           | Floating number | Swap value for long positions in pips                                                                                      |
+            | swapShort          | Floating number | Swap value for short positions in pips                                                                                     |
+            | swapType           | Number          | Type of swap calculated                                                                                                    |
+            | symbol             | String          | Symbol name                                                                                                                |
+            | tickSize           | Floating number | Smallest possible price change, used for profit/margin calculation, null if not applicable                                 |
+            | tickValue          | Floating number | Value of smallest possible price change (in base currency), used for profit/margin calculation, null if not applicable     |
+            | time               | Time            | Ask & bid tick time                                                                                                        |
+            | timeString         | String          | Time in String                                                                                                             |
+            | trailingEnabled    | Boolean         | Indicates whether trailing stop (offset) is applicable to the instrument.                                                  |
+            | type               | Number          | Instrument class number                                                                                                    |
+
+            Example:
+
+            ```
+            {
+            	"ask": 4000.0,
+            	"bid": 4000.0,
+            	"categoryName": "Forex",
+            	"contractSize": 100000,
+            	"currency": "USD",
+            	"currencyPair": true,
+            	"currencyProfit": "SEK",
+            	"description": "USD/PLN",
+            	"expiration": null,
+            	"groupName": "Minor",
+            	"high": 4000.0,
+            	"initialMargin": 0,
+            	"instantMaxVolume": 0,
+            	"leverage": 1.5,
+            	"longOnly": false,
+            	"lotMax": 10.0,
+            	"lotMin": 0.1,
+            	"lotStep": 0.1,
+            	"low": 3500.0,
+            	"marginHedged": 0,
+            	"marginHedgedStrong": false,
+            	"marginMaintenance": null,
+            	"marginMode": 101,
+            	"percentage": 100.0,
+            	"precision": 2,
+            	"profitMode": 5,
+            	"quoteId": 1,
+            	"shortSelling": true,
+            	"spreadRaw": 0.000003,
+            	"spreadTable": 0.00042,
+            	"starting": null,
+            	"stepRuleId": 1,
+            	"stopsLevel": 0,
+            	"swap_rollover3days": 0,
+            	"swapEnable": true,
+            	"swapLong": -2.55929,
+            	"swapShort": 0.131,
+            	"swapType": 0,
+            	"symbol": "USDPLN",
+            	"tickSize": 1.0,
+            	"tickValue": 1.0,
+            	"time": 1272446136891,
+            	"timeString": "Thu May 23 12:23:44 EDT 2013",
+            	"trailingEnabled": true,
+            	"type": 21
+            }
+            ```
+
+            **Possible values of** `quoteId` **field:**
+
+            | name  | value | description |
+            | ----- | ----- | ----------- |
+            | fixed | 1     | fixed       |
+            | float | 2     | float       |
+            | depth | 3     | depth       |
+            | cross | 4     | cross       |
+
+            **Possible values of** `marginMode` **field:**
+
+            | name          | value | description   |
+            | ------------- | ----- | ------------- |
+            | Forex         | 101   | Forex         |
+            | CFD leveraged | 102   | CFD leveraged |
+            | CFD           | 103   | CFD           |
+
+            **Possible values of** `profitMode` **field:**
+
+            | name  | value | description |
+            | ----- | ----- | ----------- |
+            | FOREX | 5     | FOREX       |
+            | CFD   | 6     | CFD         |
+
+        15. #### Command: **getTickPrices**
+
+            Description: **Please note that this function can be usually replaced by its streaming equivalent [`getTickPrices `](http://developers.xstore.pro/documentation/#streamgetTickPrices) which is the preferred way of retrieving ticks data.** Returns array of current quotations for given symbols, only quotations that changed from given timestamp are returned. New timestamp obtained from output will be used as an argument of the next call of this command.
+
+            ##### Request:
+
+            Parameters:
+
+            | name      | type   | description                                                                                                                                                                                               |
+            | --------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+            | level     | Number | price level                                                                                                                                                                                               |
+            | symbols   | array  | Array of symbol names (Strings)                                                                                                                                                                           |
+            | timestamp | Time   | The time from which the most recent tick should be looked for. Historical prices cannot be obtained using this parameter. It can only be used to verify whether a price has changed since the given time. |
+
+            Example:
+
+            ```
+            {
+            	"command": "getTickPrices",
+            	"arguments": {
+            		"level": 0,
+            		"symbols": ["EURPLN", "AGO.PL", ...],
+            		"timestamp": 1262944112000
+            	}
+            }
+            ```
+
+            **Possible values of** `level` **field:**
+
+            | name | value | description                                 |
+            | ---- | ----- | ------------------------------------------- |
+            |      | -1    | all available levels                        |
+            |      | 0     | base level bid and ask price for instrument |
+            |      | >0    | specified level                             |
+
+            ##### Response:
+
+            Parameters:
+
+            | name       | type  | description                                                                        |
+            | ---------- | ----- | ---------------------------------------------------------------------------------- |
+            | quotations | array | Array of [`TICK_RECORD `](http://developers.xstore.pro/documentation/#TICK_RECORD) |
+
+            Example:
+
+            ```
+            {
+            	"status": true,
+            	"returnData": {
+            		"quotations": [TICK_RECORD, TICK_RECORD, ...]
+            	}
+            }
+            ```
+
+            **Format of** `TICK_RECORD`:
+
+            | name        | type            | description                                                              |
+            | ----------- | --------------- | ------------------------------------------------------------------------ |
+            | ask         | Floating number | Ask price in base currency                                               |
+            | askVolume   | Number          | Number of available lots to buy at given price or null if not applicable |
+            | bid         | Floating number | Bid price in base currency                                               |
+            | bidVolume   | Number          | Number of available lots to buy at given price or null if not applicable |
+            | high        | Floating number | The highest price of the day in base currency                            |
+            | level       | Number          | Price level                                                              |
+            | low         | Floating number | The lowest price of the day in base currency                             |
+            | spreadRaw   | Floating number | The difference between raw ask and bid prices                            |
+            | spreadTable | Floating number | Spread representation                                                    |
+            | symbol      | String          | Symbol                                                                   |
+            | timestamp   | Time            | Timestamp                                                                |
+
+            Example:
+
+            ```
+            {
+            	"ask": 4000.0,
+            	"askVolume": 15000,
+            	"bid": 4000.0,
+            	"bidVolume": 16000,
+            	"high": 4000.0,
+            	"level": 0,
+            	"low": 3500.0,
+            	"spreadRaw": 0.000003,
+            	"spreadTable": 0.00042,
+            	"symbol": "KOMB.CZ",
+            	"timestamp": 1272529161605
+            }
+            ```
+
+            **Possible values of** `level` **field:**
+
+            | name | value | description                                 |
+            | ---- | ----- | ------------------------------------------- |
+            |      | -1    | all available levels                        |
+            |      | 0     | base level bid and ask price for instrument |
+            |      | >0    | specified level                             |
+
+        16. #### Command: **getTradeRecords**
+
+            Description: Returns array of trades listed in `orders` argument.
+
+            ##### Request:
+
+            Parameters:
+
+            | name   | type  | description                        |
+            | ------ | ----- | ---------------------------------- |
+            | orders | array | Array of orders (position numbers) |
+
+            Example:
+
+            ```
+            {
+            	"command": "getTradeRecords",
+            	"arguments": {
+            		"orders": [7489839, 7489841, ...]
+            	}
+            }
+            ```
+
+            ##### Response:
+
+            Parameters:
+
+            | name | type  | description                                                                          |
+            | ---- | ----- | ------------------------------------------------------------------------------------ |
+            |      | array | Array of [`TRADE_RECORD `](http://developers.xstore.pro/documentation/#TRADE_RECORD) |
+
+            Example:
+
+            ```
+            {
+            	"status": true,
+            	"returnData": [TRADE_RECORD, TRADE_RECORD, ...]
+            }
+            ```
+
+            **Format of** `TRADE_RECORD`:
+
+            `cmd` is the operation code, for user's trade operations it equals to `cmd` from [`TRADE_TRANS_INFO `](http://developers.xstore.pro/documentation/#TRADE_TRANS_INFO) record used as an argument in [`tradeTransaction `](http://developers.xstore.pro/documentation/#tradeTransaction) command
+
+            | name             | type            | description                                                       |
+            | ---------------- | --------------- | ----------------------------------------------------------------- |
+            | close_price      | Floating number | Close price in base currency                                      |
+            | close_time       | Time            | Null if order is not closed                                       |
+            | close_timeString | String          | Null if order is not closed                                       |
+            | closed           | Boolean         | Closed                                                            |
+            | cmd              | Number          | Operation code                                                    |
+            | comment          | String          | Comment                                                           |
+            | commission       | Floating number | Commission in account currency, null if not applicable            |
+            | customComment    | String          | The value the customer may provide in order to retrieve it later. |
+            | digits           | Number          | Number of decimal places                                          |
+            | expiration       | Time            | Null if order is not closed                                       |
+            | expirationString | String          | Null if order is not closed                                       |
+            | margin_rate      | Floating number | Margin rate                                                       |
+            | offset           | Number          | Trailing offset                                                   |
+            | open_price       | Floating number | Open price in base currency                                       |
+            | open_time        | Time            | Open time                                                         |
+            | open_timeString  | String          | Open time string                                                  |
+            | order            | Number          | Order number for opened transaction                               |
+            | order2           | Number          | Order number for closed transaction                               |
+            | position         | Number          | Order number common both for opened and closed transaction        |
+            | profit           | Floating number | Profit in account currency                                        |
+            | sl               | Floating number | Zero if stop loss is not set (in base currency)                   |
+            | storage          | Floating number | order swaps in account currency                                   |
+            | symbol           | String          | symbol name or null for deposit/withdrawal operations             |
+            | timestamp        | Time            | Timestamp                                                         |
+            | tp               | Floating number | Zero if take profit is not set (in base currency)                 |
+            | volume           | Floating number | Volume in lots                                                    |
+
+            Example:
+
+            ```
+            {
+            	"close_price": 1.3256,
+            	"close_time": null,
+            	"close_timeString": null,
+            	"closed": false,
+            	"cmd": 0,
+            	"comment": "Web Trader",
+            	"commission": 0.0,
+            	"customComment": "Some text",
+            	"digits": 4,
+            	"expiration": null,
+            	"expirationString": null,
+            	"margin_rate": 0.0,
+            	"offset": 0,
+            	"open_price": 1.4,
+            	"open_time": 1272380927000,
+            	"open_timeString": "Fri Jan 11 10:03:36 CET 2013",
+            	"order": 7497776,
+            	"order2": 1234567,
+            	"position": 1234567,
+            	"profit": -2196.44,
+            	"sl": 0.0,
+            	"storage": -4.46,
+            	"symbol": "EURUSD",
+            	"timestamp": 1272540251000,
+            	"tp": 0.0,
+            	"volume": 0.10
+            }
+            ```
+
+            **Possible values of** `cmd` **field:**
+
+            | name       | value | description                                                                                                                                                                                         |
+            | ---------- | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+            | BUY        | 0     | buy                                                                                                                                                                                                 |
+            | SELL       | 1     | sell                                                                                                                                                                                                |
+            | BUY_LIMIT  | 2     | buy limit                                                                                                                                                                                           |
+            | SELL_LIMIT | 3     | sell limit                                                                                                                                                                                          |
+            | BUY_STOP   | 4     | buy stop                                                                                                                                                                                            |
+            | SELL_STOP  | 5     | sell stop                                                                                                                                                                                           |
+            | BALANCE    | 6     | Read only. Used in [`getTradesHistory `](http://developers.xstore.pro/documentation/#getTradesHistory) for manager's deposit/withdrawal operations (profit>0 for deposit, profit<0 for withdrawal). |
+            | CREDIT     | 7     | Read only                                                                                                                                                                                           |
+
+        17. #### Command: **getTrades**
+
+            Description: **Please note that this function can be usually replaced by its streaming equivalent [`getTrades `](http://developers.xstore.pro/documentation/#streamgetTrades) which is the preferred way of retrieving trades data.** Returns array of user's trades.
+
+            ##### Request:
+
+            Parameters:
+
+            | name       | type    | description                                      |
+            | ---------- | ------- | ------------------------------------------------ |
+            | openedOnly | boolean | if true then only opened trades will be returned |
+
+            Example:
+
+            ```
+            {
+            	"command": "getTrades",
+            	"arguments": {
+            		"openedOnly": true
+            	}
+            }
+            ```
+
+            ##### Response:
+
+            Parameters:
+
+            | name | type  | description                                                                          |
+            | ---- | ----- | ------------------------------------------------------------------------------------ |
+            |      | array | Array of [`TRADE_RECORD `](http://developers.xstore.pro/documentation/#TRADE_RECORD) |
+
+            Example:
+
+            ```
+            {
+            	"status": true,
+            	"returnData": [TRADE_RECORD, TRADE_RECORD, ...]
+            }
+            ```
+
+            **Format of** `TRADE_RECORD`:
+
+            `cmd` is the operation code, for user's trade operations it equals to `cmd` from [`TRADE_TRANS_INFO `](http://developers.xstore.pro/documentation/#TRADE_TRANS_INFO) record used as an argument in [`tradeTransaction `](http://developers.xstore.pro/documentation/#tradeTransaction) command
+
+            | name             | type            | description                                                       |
+            | ---------------- | --------------- | ----------------------------------------------------------------- |
+            | close_price      | Floating number | Close price in base currency                                      |
+            | close_time       | Time            | Null if order is not closed                                       |
+            | close_timeString | String          | Null if order is not closed                                       |
+            | closed           | Boolean         | Closed                                                            |
+            | cmd              | Number          | Operation code                                                    |
+            | comment          | String          | Comment                                                           |
+            | commission       | Floating number | Commission in account currency, null if not applicable            |
+            | customComment    | String          | The value the customer may provide in order to retrieve it later. |
+            | digits           | Number          | Number of decimal places                                          |
+            | expiration       | Time            | Null if order is not closed                                       |
+            | expirationString | String          | Null if order is not closed                                       |
+            | margin_rate      | Floating number | Margin rate                                                       |
+            | offset           | Number          | Trailing offset                                                   |
+            | open_price       | Floating number | Open price in base currency                                       |
+            | open_time        | Time            | Open time                                                         |
+            | open_timeString  | String          | Open time string                                                  |
+            | order            | Number          | Order number for opened transaction                               |
+            | order2           | Number          | Order number for closed transaction                               |
+            | position         | Number          | Order number common both for opened and closed transaction        |
+            | profit           | Floating number | Profit in account currency                                        |
+            | sl               | Floating number | Zero if stop loss is not set (in base currency)                   |
+            | storage          | Floating number | order swaps in account currency                                   |
+            | symbol           | String          | symbol name or null for deposit/withdrawal operations             |
+            | timestamp        | Time            | Timestamp                                                         |
+            | tp               | Floating number | Zero if take profit is not set (in base currency)                 |
+            | volume           | Floating number | Volume in lots                                                    |
+
+            Example:
+
+            ```
+            {
+            	"close_price": 1.3256,
+            	"close_time": null,
+            	"close_timeString": null,
+            	"closed": false,
+            	"cmd": 0,
+            	"comment": "Web Trader",
+            	"commission": 0.0,
+            	"customComment": "Some text",
+            	"digits": 4,
+            	"expiration": null,
+            	"expirationString": null,
+            	"margin_rate": 0.0,
+            	"offset": 0,
+            	"open_price": 1.4,
+            	"open_time": 1272380927000,
+            	"open_timeString": "Fri Jan 11 10:03:36 CET 2013",
+            	"order": 7497776,
+            	"order2": 1234567,
+            	"position": 1234567,
+            	"profit": -2196.44,
+            	"sl": 0.0,
+            	"storage": -4.46,
+            	"symbol": "EURUSD",
+            	"timestamp": 1272540251000,
+            	"tp": 0.0,
+            	"volume": 0.10
+            }
+            ```
+
+            **Possible values of** `cmd` **field:**
+
+            | name       | value | description                                                                                                                                                                                         |
+            | ---------- | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+            | BUY        | 0     | buy                                                                                                                                                                                                 |
+            | SELL       | 1     | sell                                                                                                                                                                                                |
+            | BUY_LIMIT  | 2     | buy limit                                                                                                                                                                                           |
+            | SELL_LIMIT | 3     | sell limit                                                                                                                                                                                          |
+            | BUY_STOP   | 4     | buy stop                                                                                                                                                                                            |
+            | SELL_STOP  | 5     | sell stop                                                                                                                                                                                           |
+            | BALANCE    | 6     | Read only. Used in [`getTradesHistory `](http://developers.xstore.pro/documentation/#getTradesHistory) for manager's deposit/withdrawal operations (profit>0 for deposit, profit<0 for withdrawal). |
+            | CREDIT     | 7     | Read only                                                                                                                                                                                           |
+
+        18. #### Command: **getTradesHistory**
+
+            Description: **Please note that this function can be usually replaced by its streaming equivalent [`getTrades `](http://developers.xstore.pro/documentation/#streamgetTrades) which is the preferred way of retrieving trades data.** Returns array of user's trades which were closed within specified period of time.
+
+            ##### Request:
+
+            Parameters:
+
+            | name  | type | description                               |
+            | ----- | ---- | ----------------------------------------- |
+            | end   | Time | Time, 0 means current time for simplicity |
+            | start | Time | Time, 0 means last month interval         |
+
+            Example:
+
+            ```
+            {
+            	"command": "getTradesHistory",
+            	"arguments": {
+            		"end": 0,
+            		"start": 1275993488000
+            	}
+            }
+            ```
+
+            ##### Response:
+
+            Parameters:
+
+            | name | type  | description                                                                          |
+            | ---- | ----- | ------------------------------------------------------------------------------------ |
+            |      | array | Array of [`TRADE_RECORD `](http://developers.xstore.pro/documentation/#TRADE_RECORD) |
+
+            Example:
+
+            ```
+            {
+            	"status": true,
+            	"returnData": [TRADE_RECORD, TRADE_RECORD, ...]
+            }
+            ```
+
+            **Format of** `TRADE_RECORD`:
+
+            `cmd` is the operation code, for user's trade operations it equals to `cmd` from [`TRADE_TRANS_INFO `](http://developers.xstore.pro/documentation/#TRADE_TRANS_INFO) record used as an argument in [`tradeTransaction `](http://developers.xstore.pro/documentation/#tradeTransaction) command
+
+            | name             | type            | description                                                       |
+            | ---------------- | --------------- | ----------------------------------------------------------------- |
+            | close_price      | Floating number | Close price in base currency                                      |
+            | close_time       | Time            | Null if order is not closed                                       |
+            | close_timeString | String          | Null if order is not closed                                       |
+            | closed           | Boolean         | Closed                                                            |
+            | cmd              | Number          | Operation code                                                    |
+            | comment          | String          | Comment                                                           |
+            | commission       | Floating number | Commission in account currency, null if not applicable            |
+            | customComment    | String          | The value the customer may provide in order to retrieve it later. |
+            | digits           | Number          | Number of decimal places                                          |
+            | expiration       | Time            | Null if order is not closed                                       |
+            | expirationString | String          | Null if order is not closed                                       |
+            | margin_rate      | Floating number | Margin rate                                                       |
+            | offset           | Number          | Trailing offset                                                   |
+            | open_price       | Floating number | Open price in base currency                                       |
+            | open_time        | Time            | Open time                                                         |
+            | open_timeString  | String          | Open time string                                                  |
+            | order            | Number          | Order number for opened transaction                               |
+            | order2           | Number          | Order number for closed transaction                               |
+            | position         | Number          | Order number common both for opened and closed transaction        |
+            | profit           | Floating number | Profit in account currency                                        |
+            | sl               | Floating number | Zero if stop loss is not set (in base currency)                   |
+            | storage          | Floating number | order swaps in account currency                                   |
+            | symbol           | String          | symbol name or null for deposit/withdrawal operations             |
+            | timestamp        | Time            | Timestamp                                                         |
+            | tp               | Floating number | Zero if take profit is not set (in base currency)                 |
+            | volume           | Floating number | Volume in lots                                                    |
+
+            Example:
+
+            ```
+            {
+            	"close_price": 1.3256,
+            	"close_time": null,
+            	"close_timeString": null,
+            	"closed": false,
+            	"cmd": 0,
+            	"comment": "Web Trader",
+            	"commission": 0.0,
+            	"customComment": "Some text",
+            	"digits": 4,
+            	"expiration": null,
+            	"expirationString": null,
+            	"margin_rate": 0.0,
+            	"offset": 0,
+            	"open_price": 1.4,
+            	"open_time": 1272380927000,
+            	"open_timeString": "Fri Jan 11 10:03:36 CET 2013",
+            	"order": 7497776,
+            	"order2": 1234567,
+            	"position": 1234567,
+            	"profit": -2196.44,
+            	"sl": 0.0,
+            	"storage": -4.46,
+            	"symbol": "EURUSD",
+            	"timestamp": 1272540251000,
+            	"tp": 0.0,
+            	"volume": 0.10
+            }
+            ```
+
+            **Possible values of** `cmd` **field:**
+
+            | name       | value | description                                                                                                                                                                                         |
+            | ---------- | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+            | BUY        | 0     | buy                                                                                                                                                                                                 |
+            | SELL       | 1     | sell                                                                                                                                                                                                |
+            | BUY_LIMIT  | 2     | buy limit                                                                                                                                                                                           |
+            | SELL_LIMIT | 3     | sell limit                                                                                                                                                                                          |
+            | BUY_STOP   | 4     | buy stop                                                                                                                                                                                            |
+            | SELL_STOP  | 5     | sell stop                                                                                                                                                                                           |
+            | BALANCE    | 6     | Read only. Used in [`getTradesHistory `](http://developers.xstore.pro/documentation/#getTradesHistory) for manager's deposit/withdrawal operations (profit>0 for deposit, profit<0 for withdrawal). |
+            | CREDIT     | 7     | Read only                                                                                                                                                                                           |
+
+        19. #### Command: **getTradingHours**
+
+            Description: Returns quotes and trading times.
+
+            ##### Request:
+
+            Parameters:
+
+            | name    | type  | description                     |
+            | ------- | ----- | ------------------------------- |
+            | symbols | array | Array of symbol names (Strings) |
+
+            Example:
+
+            ```
+            {
+            	"command": "getTradingHours",
+            	"arguments": {
+            		"symbols": ["EURPLN", "AGO.PL", ...]
+            	}
+            }
+            ```
+
+            ##### Response:
+
+            Parameters:
+
+            | name | type  | description                                                                                          |
+            | ---- | ----- | ---------------------------------------------------------------------------------------------------- |
+            |      | array | Array of [`TRADING_HOURS_RECORD `](http://developers.xstore.pro/documentation/#TRADING_HOURS_RECORD) |
+
+            Example:
+
+            ```
+            {
+            	"status": true,
+            	"returnData": [TRADING_HOURS_RECORD, TRADING_HOURS_RECORD, ...]
+            }
+            ```
+
+            **Format of** `TRADING_HOURS_RECORD`:
+
+            | name    | type   | description                                                                              |
+            | ------- | ------ | ---------------------------------------------------------------------------------------- |
+            | quotes  | array  | Array of [`QUOTES_RECORD `](http://developers.xstore.pro/documentation/#QUOTES_RECORD)   |
+            | symbol  | String | Symbol                                                                                   |
+            | trading | array  | Array of [`TRADING_RECORD `](http://developers.xstore.pro/documentation/#TRADING_RECORD) |
+
+            Example:
+
+            ```
+            {
+            	"quotes": [QUOTES_RECORD, QUOTES_RECORD, ...],
+            	"symbol": "USDPLN",
+            	"trading": [TRADING_RECORD, TRADING_RECORD, ...]
+            }
+            ```
+
+            **Format of** `QUOTES_RECORD`:
+
+            | name  | type   | description                                                                      |
+            | ----- | ------ | -------------------------------------------------------------------------------- |
+            | day   | Number | Day of week                                                                      |
+            | fromT | Time   | Start time in ms from 00:00 CET / CEST time zone (see Daylight Saving Time, DST) |
+            | toT   | Time   | End time in ms from 00:00 CET / CEST time zone (see Daylight Saving Time, DST)   |
+
+            Example:
+
+            ```
+            {
+            	"day": 2,
+            	"fromT": 63000000,
+            	"toT": 63300000
+            }
+            ```
+
+            **Possible values of** `day` **field:**
+
+            | name | value | description |
+            | ---- | ----- | ----------- |
+            |      | 1     | Monday      |
+            |      | 2     | Tuesday     |
+            |      | 3     | Wednesday   |
+            |      | 4     | Thursday    |
+            |      | 5     | Friday      |
+            |      | 6     | Saturday    |
+            |      | 7     | Sunday      |
+
+            **Format of** `TRADING_RECORD`:
+
+            | name  | type   | description                                                                      |
+            | ----- | ------ | -------------------------------------------------------------------------------- |
+            | day   | Number | Day of week                                                                      |
+            | fromT | Time   | Start time in ms from 00:00 CET / CEST time zone (see Daylight Saving Time, DST) |
+            | toT   | Time   | End time in ms from 00:00 CET / CEST time zone (see Daylight Saving Time, DST)   |
+
+            Example:
+
+            ```
+            {
+            	"day": 2,
+            	"fromT": 63000000,
+            	"toT": 63300000
+            }
+            ```
+
+            **Possible values of** `day` **field:**
+
+            | name | value | description |
+            | ---- | ----- | ----------- |
+            |      | 1     | Monday      |
+            |      | 2     | Tuesday     |
+            |      | 3     | Wednesday   |
+            |      | 4     | Thursday    |
+            |      | 5     | Friday      |
+            |      | 6     | Saturday    |
+            |      | 7     | Sunday      |
+
+        20. #### Command: **getVersion**
+
+            Description: Returns the current API version.
+
+            ##### Request:
+
+            Example:
+
+            ```
+            {
+            	"command": "getVersion"
+            }
+            ```
+
+            ##### Response:
+
+            Parameters:
+
+            | name    | type   | description         |
+            | ------- | ------ | ------------------- |
+            | version | String | current API version |
+
+            Example:
+
+            ```
+            {
+            	"status": true,
+            	"returnData": {
+            		"version": "2.4.15"
+            	}
+            }
+            ```
+
+        21. #### Command: **ping**
+
+            Description: Regularly calling this function is enough to refresh the internal state of all the components in the system. It is recommended that any application that does not execute other commands, should call this command at least once every 10 minutes. Please note that the streaming counterpart of this function is combination of [`ping `](http://developers.xstore.pro/documentation/#streamping) and [`getKeepAlive `](http://developers.xstore.pro/documentation/#streamgetKeepAlive).
+
+            ##### Request:
+
+            Example:
+
+            ```
+            {
+            	"command": "ping"
+            }
+            ```
+
+            ##### Response:
+
+            Example:
+
+            ```
+            {
+            	"status": true
+            }
+            ```
+
+        22. #### Command: **tradeTransaction**
+
+            Description: Starts trade transaction. tradeTransaction sends main transaction information to the server.
+
+            **How to verify that the trade request was accepted?**
+
+            The `status` field set to 'true' **does not** imply that the transaction was accepted. It only means, that the server acquired your request and began to process it. To analyse the status of the transaction (for example to verify if it was accepted or rejected) use the [`tradeTransactionStatus `](http://developers.xstore.pro/documentation/#tradeTransactionStatus) command with the `order` number, that came back with the response of the [`tradeTransaction `](http://developers.xstore.pro/documentation/#tradeTransaction) command. You can find the example here: [developers.xstore.pro/api/tutorials/opening_and_closing_trades2](http://developers.xstore.pro/api/tutorials/opening_and_closing_trades2)
+
+            ##### Request:
+
+            Parameters:
+
+            | name           | type             | description    |
+            | -------------- | ---------------- | -------------- |
+            | tradeTransInfo | TRADE_TRANS_INFO | tradeTransInfo |
+
+            Example:
+
+            ```
+            {
+            	"command": "tradeTransaction",
+            	"arguments": {
+            		"tradeTransInfo": TRADE_TRANS_INFO
+            	}
+            }
+            ```
+
+            **Format of** `TRADE_TRANS_INFO`:
+
+            | name          | type            | description                                                       |
+            | ------------- | --------------- | ----------------------------------------------------------------- |
+            | cmd           | Number          | Operation code                                                    |
+            | customComment | String          | The value the customer may provide in order to retrieve it later. |
+            | expiration    | Time            | Pending order expiration time                                     |
+            | offset        | Number          | Trailing offset                                                   |
+            | order         | Number          | 0 or position number for closing/modifications                    |
+            | price         | Floating number | Trade price                                                       |
+            | sl            | Floating number | Stop loss                                                         |
+            | symbol        | String          | Trade symbol                                                      |
+            | tp            | Floating number | Take profit                                                       |
+            | type          | Number          | Trade transaction type                                            |
+            | volume        | Floating number | Trade volume                                                      |
+
+            Example:
+
+            ```
+            {
+            	"cmd": 2,
+            	"customComment": "Some text",
+            	"expiration": 1462006335000,
+            	"offset": 0,
+            	"order": 82188055,
+            	"price": 1.12,
+            	"sl": 0.0,
+            	"symbol": "EURUSD",
+            	"tp": 0.0,
+            	"type": 0,
+            	"volume": 5.0
+            }
+            ```
+
+            **Possible values of** `cmd` **field:**
+
+            | name       | value | description                                                                                                                                                                                         |
+            | ---------- | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+            | BUY        | 0     | buy                                                                                                                                                                                                 |
+            | SELL       | 1     | sell                                                                                                                                                                                                |
+            | BUY_LIMIT  | 2     | buy limit                                                                                                                                                                                           |
+            | SELL_LIMIT | 3     | sell limit                                                                                                                                                                                          |
+            | BUY_STOP   | 4     | buy stop                                                                                                                                                                                            |
+            | SELL_STOP  | 5     | sell stop                                                                                                                                                                                           |
+            | BALANCE    | 6     | Read only. Used in [`getTradesHistory `](http://developers.xstore.pro/documentation/#getTradesHistory) for manager's deposit/withdrawal operations (profit>0 for deposit, profit<0 for withdrawal). |
+            | CREDIT     | 7     | Read only                                                                                                                                                                                           |
+
+            **Possible values of** `type` **field:**
+
+            | name    | value | description                                                                                                                   |
+            | ------- | ----- | ----------------------------------------------------------------------------------------------------------------------------- |
+            | OPEN    | 0     | order open, used for opening orders                                                                                           |
+            | PENDING | 1     | order pending, only used in the streaming [`getTrades `](http://developers.xstore.pro/documentation/#streamgetTrades) command |
+            | CLOSE   | 2     | order close                                                                                                                   |
+            | MODIFY  | 3     | order modify, only used in the [`tradeTransaction `](http://developers.xstore.pro/documentation/#tradeTransaction) command    |
+            | DELETE  | 4     | order delete, only used in the [`tradeTransaction `](http://developers.xstore.pro/documentation/#tradeTransaction) command    |
+
+            ##### Response:
+
+            Parameters:
+
+            | name  | type   | description |
+            | ----- | ------ | ----------- |
+            | order | Number | order       |
+
+            Example:
+
+            ```
+            {
+            	"status": true,
+            	"returnData": {
+            		"order": 43
+            	}
+            }
+            ```
+
+        23. #### Command: **tradeTransactionStatus**
+
+            Description: **Please note that this function can be usually replaced by its streaming equivalent [`getTradeStatus `](http://developers.xstore.pro/documentation/#streamgetTradeStatus) which is the preferred way of retrieving transaction status data.** Returns current transaction status. At any time of transaction processing client might check the status of transaction on server side. In order to do that client must provide unique order taken from [`tradeTransaction `](http://developers.xstore.pro/documentation/#tradeTransaction) invocation.
+
+            ##### Request:
+
+            Parameters:
+
+            | name  | type   | description |
+            | ----- | ------ | ----------- |
+            | order | Number | order       |
+
+            Example:
+
+            ```
+            {
+            	"command": "tradeTransactionStatus",
+            	"arguments": {
+            		"order": 43
+            	}
+            }
+            ```
+
+            ##### Response:
+
+            Parameters:
+
+            | name          | type            | description                                                       |
+            | ------------- | --------------- | ----------------------------------------------------------------- |
+            | ask           | Floating number | Price in base currency                                            |
+            | bid           | Floating number | Price in base currency                                            |
+            | customComment | String          | The value the customer may provide in order to retrieve it later. |
+            | message       | String          | Can be null                                                       |
+            | order         | Number          | Unique order number                                               |
+            | requestStatus | Number          | Request status code, described below                              |
+
+            Example:
+
+            ```
+            {
+            	"status": true,
+            	"returnData": {
+            		"ask": 1.392,
+            		"bid": 1.392,
+            		"customComment": "Some text",
+            		"message": null,
+            		"order": 43,
+            		"requestStatus": 3
+            	}
+            }
+            ```
+
+            **Possible values of** `requestStatus` **field:**
+
+            | name     | value | description                                    |
+            | -------- | ----- | ---------------------------------------------- |
+            | ERROR    | 0     | error                                          |
+            | PENDING  | 1     | pending                                        |
+            | ACCEPTED | 3     | The transaction has been executed successfully |
+            | REJECTED | 4     | The transaction has been rejected              |
+
+4.  ## Available streaming commands
 
 Each streaming command takes as an argument `streamSessionId` which is sent in response message for login command performed in main connection. `streamSessionId` token allows to identify user in streaming connection. In one streaming connection multiple commands with different `streamSessionId` can be invoked. It will cause sending streaming data for multiple login sessions in one streaming connection. `streamSessionId` is valid until logout command is performed on main connection or main connection is disconnected.
 
