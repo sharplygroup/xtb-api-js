@@ -35,4 +35,4 @@ jobs:
       - name: Commit and Push Version Bump
         run: git push --follow-tags origin main
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ACTIONS_TOKEN }}
