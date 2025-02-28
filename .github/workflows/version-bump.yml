@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write  # Allows pushing changes
+    env:
+      GITHUB_TOKEN: ${{ secrets.ACTIONS_TOKEN }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -26,13 +28,12 @@ jobs:
 
       - name: Configure Git User
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "release[bot]"
+          git config --global user.email "release[bot]@users.noreply.github.com"
 
       - name: Bump Version
         run: npx standard-version
 
       - name: Commit and Push Version Bump
         run: |
-          git push https://${{ secrets.ACTIONS_TOKEN }}@github.com/sharplygroup/xtb-api-js.git
-          git push --tags https://${{ secrets.ACTIONS_TOKEN }}@github.com/sharplygroup/xtb-api-js.git
+          git push --follow-tags origin main
