@@ -33,6 +33,5 @@ jobs:
         run: npx standard-version
 
       - name: Commit and Push Version Bump
-        run: git push --follow-tags origin main
-        env:
-          GITHUB_TOKEN: ${{ secrets.ACTIONS_TOKEN }}
+        run: |
+          git push --follow-tags https://${{ secrets.ACTIONS_TOKEN }}@github.com/sharplygroup/xtb-api-js.git
