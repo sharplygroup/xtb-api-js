@@ -1,0 +1,32 @@
+name: Auto Version Bump
+
+on:
+  push:
+    branches:
+      - main  # Trigger on pushes to main
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Bump Version
+        run: npx standard-version
+
+      - name: Commit and Push Version Bump
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git push --follow-tags origin main
